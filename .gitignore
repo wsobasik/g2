@@ -1,0 +1,6 @@
+.iml
+.csv
+/.idea
+/src/main/bin/*
+/resources/
+target/
