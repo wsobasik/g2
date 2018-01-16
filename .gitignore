@@ -2,5 +2,7 @@
 .csv
 /.idea
 /src/main/bin/*
-/resources/
+src/resources/NCndohlcv.txt
+src/resources/ndohlcv.txt
+src/resources/PROD._MAKL_.csv
 target/

@@ -1,6 +1,8 @@
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import java.io.*;
 import java.net.MalformedURLException;
@@ -58,6 +60,7 @@ public class Program {
 
         Map<String, ArrayList<Transaction>> mapOfTransactions = createAMapOfTransactions(transactionTable);//new
         ArrayList<StockNew> stockList = createStockList(actualStockPrize, mapOfTransactions);
+        calculateSplits(stockList);
         calculateStocks(stockList);
 
         stockList.sort(( StockNew s1, StockNew s2) ->s1.getActualVolume().compareTo(s2.getActualVolume()));
@@ -144,6 +147,23 @@ public class Program {
         /* TODO ustawic cene aktualna na zero i obrabiac to jakos komunikatem przy liczeniu traktowac jako przypadek
          * szczegolny */
 
+
+    }
+
+    private void calculateSplits(ArrayList<StockNew> stockList) {
+
+        for (StockNew stock : stockList) {
+            if (stock.getStockName().equals("DREWEX")){
+
+                for (Transaction transaction : stock.getTransactionsList()) {
+                    LocalDate date = new LocalDate(2015, 05, 10);
+                    if (transaction.getTransactionDate().isAfter(date)){
+                        //TODO dokonczyc split
+
+                    }
+                }
+            }
+        }
 
     }
 
