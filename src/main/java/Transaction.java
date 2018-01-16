@@ -10,6 +10,7 @@ public class Transaction {
     private int volume;
     private double prize;
     private double value;
+    private int volumeAfterTransaction;
 
     public Transaction(String[] line) {
 
@@ -67,5 +68,13 @@ public class Transaction {
 
     public void setPrize(double prize) {
         this.prize = prize;
+    }
+
+    public int getVolumeAfterTransaction() {
+        return volumeAfterTransaction;
+    }
+
+    public void setVolumeAfterTransaction(int volumeAfterTransaction) {
+        this.volumeAfterTransaction = volumeAfterTransaction;
     }
 }

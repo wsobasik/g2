@@ -22,7 +22,19 @@ public class StockNew {
         } else {
             this.actualPrize = 0.0;
         }
+
         this.transactionsList = transactions;
+/*
+        for (Transaction transaction : transactions) {
+            if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                this.actualVolume += transaction.getVolume();
+            } else {
+                this.actualVolume -= transaction.getVolume();
+            }
+            actualValue;
+        }
+*/
+        //TODO dodac inicjalizacje pozostalych pol
     }
 
 
@@ -88,14 +100,15 @@ public class StockNew {
     }
 
     public void setTotalCashIfSellToday() {
-        this.totalCashIfSellToday = round(actualValue + historicalSoldValue - historicalBuyValue,2);
+        this.totalCashIfSellToday = round(actualValue + historicalSoldValue - historicalBuyValue, 2);
     }//TODO zaokraglanie
 
     @Override
     public String toString() {
-        if (actualVolume==0) {return stockName +" " + totalCashIfSellToday+"\n";}
-        else
-        return stockName + " Ile: "+ actualVolume +" obcn: " +actualPrize+ " Na Rece: " + actualValue +" cashIfSoldToday:"+ totalCashIfSellToday +"\n";
+        if (actualVolume == 0) {
+            return stockName + " " + totalCashIfSellToday + "\n";
+        } else
+            return stockName + " Ile: " + actualVolume + " obcn: " + actualPrize + " Na Rece: " + actualValue + " cashIfSoldToday:" + totalCashIfSellToday + "\n";
     }
 
 

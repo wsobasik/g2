@@ -1,7 +1,6 @@
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import java.io.*;
@@ -60,10 +59,18 @@ public class Program {
 
         Map<String, ArrayList<Transaction>> mapOfTransactions = createAMapOfTransactions(transactionTable);//new
         ArrayList<StockNew> stockList = createStockList(actualStockPrize, mapOfTransactions);
-        calculateSplits(stockList);
+
+        sortTransactionsAsceding(stockList);
+        fillInTotalVolumeAfterTransaction(stockList);
+        calculateSplit(stockList, "DREWEX", 10, new LocalDate(2015, 5, 10));
+        calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
+        calculateSplit(stockList, "CIGAMES", 0.1, new LocalDate(2017, 1, 31));
+        calculateSplit(stockList, "RESBUD", 5, new LocalDate(2017, 1, 13));
+        calculateSplit(stockList, "01CYBATON", 0.05, new LocalDate(2015, 11, 25));
+
         calculateStocks(stockList);
 
-        stockList.sort(( StockNew s1, StockNew s2) ->s1.getActualVolume().compareTo(s2.getActualVolume()));
+        stockList.sort((StockNew s1, StockNew s2) -> s1.getActualVolume().compareTo(s2.getActualVolume()));
         System.out.println(stockList);
 
         for (ArrayList<Transaction> transactionsList : mapOfTransactions.values()) {
@@ -150,16 +157,63 @@ public class Program {
 
     }
 
-    private void calculateSplits(ArrayList<StockNew> stockList) {
-
+    private void fillInTotalVolumeAfterTransaction(ArrayList<StockNew> stockList) {
         for (StockNew stock : stockList) {
-            if (stock.getStockName().equals("DREWEX")){
+            ArrayList<Transaction> transactionsList = stock.getTransactionsList();
 
-                for (Transaction transaction : stock.getTransactionsList()) {
-                    LocalDate date = new LocalDate(2015, 05, 10);
-                    if (transaction.getTransactionDate().isAfter(date)){
-                        //TODO dokonczyc split
+            for (int i = 0; i < transactionsList.size(); i++) {
+                Transaction transaction = transactionsList.get(i);
+                if (i > 0) {
+                    if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                        transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() + transaction.getVolume());
+                    } else {
+                        transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() - transaction.getVolume());
+                    }
+                } else {
+                    transaction.setVolumeAfterTransaction(transaction.getVolume());
+                }
 
+
+            }
+        }
+    }
+
+    private void sortTransactionsAsceding(ArrayList<StockNew> stockList) {
+        for (StockNew stock : stockList) {
+            //posortuj tranzakcje po dacie
+            stock.getTransactionsList().sort(Comparator.comparing(Transaction::getTransactionDate));
+        }
+    }
+
+    private void calculateSplit(ArrayList<StockNew> stockList, String splittedStockName, double splitValue, LocalDate splitDate) {
+        for (StockNew stock : stockList) {
+            if (stock.getStockName().equals(splittedStockName)) {
+                ArrayList<Transaction> transactionsList = stock.getTransactionsList();
+                boolean splitFalg = false;
+                for (int i = 0; i < transactionsList.size(); i++) {
+                    //if before split i had some stock
+
+                    Transaction transaction = transactionsList.get(i);
+
+                    if ((transaction.getTransactionDate().isAfter(splitDate))) {
+                        Transaction previousTransaction = transactionsList.get(i - 1);
+                        if (splitFalg == false) {
+
+                            previousTransaction.setVolumeAfterTransaction((int) (previousTransaction.getVolumeAfterTransaction() / splitValue));
+                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolume());
+                            } else {
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolume());
+                            }
+                            splitFalg = true;
+                        } else // przeliczyc pozostale VolumeAfterTransaction TODO przeniesc to do orginalnej metody
+                        {
+                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolume());
+                            } else {
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolume());
+                            }
+                        }
                     }
                 }
             }
@@ -195,10 +249,10 @@ public class Program {
             stock.setHistoricalBuyValue(historicalBuyValue);
             stock.setHistoricalSoldValue(historicalSoldValue);
             stock.setTotalCashIfSellToday();
-            totalResultIfSoldToday+= stock.getTotalCashIfSellToday();
+            totalResultIfSoldToday += stock.getTotalCashIfSellToday();
         }
 
-        System.out.println("Total since the beginign: "+totalResultIfSoldToday);
+        System.out.println("Total since the beginign: " + totalResultIfSoldToday);
     }
 
 
@@ -221,6 +275,7 @@ public class Program {
             stockName = correctStockNameIfHasChanged(stockName);
             if (aNewHistoryTransactionTable.containsKey(stockName)) {
                 aNewHistoryTransactionTable.get(stockName).add(aNewTransaction);
+
             } else {
                 aNewHistoryTransactionTable.put(stockName, new ArrayList() {{
                     add(aNewTransaction);
