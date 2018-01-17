@@ -14,23 +14,24 @@ import java.util.Date;
 
 public class Stock {
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
     private DecimalFormat df2 = new DecimalFormat(".##");
 
 
     private int ile = 0;
     private double poIle = 0;
     private String kupnoCzySprzedaz;
-    private String[] kiedy;//rok, miesiac, dzien, godzina.minuta.sekunda
+    private String kiedy;//rok, miesiac, dzien, godzina.minuta.sekunda
     private Date dataWykonaniaTransackji = null;
 
 
-    public Stock(String[] kiedy, int ile, double poIle, String kupnoCzySprzedaz) throws ParseException {
+    public Stock(String kiedy, int ile, double poIle, String kupnoCzySprzedaz) throws ParseException {
         this.ile = ile;
         this.poIle = poIle;
         this.kupnoCzySprzedaz = kupnoCzySprzedaz;
         this.kiedy = kiedy;
-        this.dataWykonaniaTransackji = format.parse(sformatujDate(kiedy));
+        this.dataWykonaniaTransackji = format.parse(kiedy);
+        //this.dataWykonaniaTransackji = format.parse(sformatujDate(kiedy));
     }
 
     private String sformatujDate(String[] kiedy) {
@@ -68,11 +69,11 @@ public class Stock {
         this.kupnoCzySprzedaz = kupnoCzySprzedaz;
     }
 
-    public String[] getKiedy() {
+    public String getKiedy() {
         return kiedy;
     }
 
-    public void setKiedy(String[] kiedy) {
+    public void setKiedy(String kiedy) {
         this.kiedy = kiedy;
     }
 

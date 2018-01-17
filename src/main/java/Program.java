@@ -40,9 +40,9 @@ public class Program {
 
         File downloadedFileNewConnect = new File(urlNC.toString()); // New Connect
 
-
-        downloadNewFile(urlNC, savedFileNewConnect);
-        downloadNewFile(urlMS, savedFileMainStock);
+//TODO if downloaded today then stop downloading again
+     //   downloadNewFile(urlNC, savedFileNewConnect);
+ //       downloadNewFile(urlMS, savedFileMainStock);
 
 
         //wirdMethod(savedFileMainStock, downloadedFileNewConnect);
@@ -63,7 +63,7 @@ public class Program {
         sortTransactionsAsceding(stockList);
         fillInTotalVolumeAfterTransaction(stockList);
         calculateSplit(stockList, "DREWEX", 10, new LocalDate(2015, 5, 10));
-        calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
+ //       calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
         calculateSplit(stockList, "CIGAMES", 0.1, new LocalDate(2017, 1, 31));
         calculateSplit(stockList, "RESBUD", 5, new LocalDate(2017, 1, 13));
         calculateSplit(stockList, "01CYBATON", 0.05, new LocalDate(2015, 11, 25));
@@ -164,7 +164,7 @@ public class Program {
             for (int i = 0; i < transactionsList.size(); i++) {
                 Transaction transaction = transactionsList.get(i);
                 if (i > 0) {
-                    if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                    if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
                         transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() + transaction.getVolume());
                     } else {
                         transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() - transaction.getVolume());
@@ -196,11 +196,13 @@ public class Program {
                     Transaction transaction = transactionsList.get(i);
 
                     if ((transaction.getTransactionDate().isAfter(splitDate))) {
+
                         Transaction previousTransaction = transactionsList.get(i - 1);
+
                         if (splitFalg == false) {
 
                             previousTransaction.setVolumeAfterTransaction((int) (previousTransaction.getVolumeAfterTransaction() / splitValue));
-                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
                                 transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolume());
                             } else {
                                 transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolume());
@@ -208,7 +210,7 @@ public class Program {
                             splitFalg = true;
                         } else // przeliczyc pozostale VolumeAfterTransaction TODO przeniesc to do orginalnej metody
                         {
-                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
                                 transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolume());
                             } else {
                                 transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolume());
@@ -235,7 +237,7 @@ public class Program {
                 int volume = transaction.getVolume();
                 double value = transaction.getValue();
 
-                if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+                if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
                     historicalBuyValue += value;
                     buyVolume += volume;
                 } else {
@@ -289,9 +291,9 @@ public class Program {
             volume = Integer.parseInt(line[3]);
             prize = Double.parseDouble(line[4]);// kurs
 
-            if (kindOfTransaction.equals("KUPNO")) {
+            if (kindOfTransaction.equals("K")) {
             } else {
-                kindOfTransaction = "SPRZEDAZ";
+                kindOfTransaction = "S";
             }
 */
         }
@@ -615,7 +617,7 @@ public class Program {
                 Stock p : tablicat
                 ) {
             String co = p.getKupnoCzySprzedaz();
-            if (co.equals("KUPNO")) {
+            if (co.equals("K")) {
                 ZyskLubStrata -= p.getIle() * p.getPoIle();
             } // kupuje czyli jestem na minusie
 
@@ -950,7 +952,7 @@ public class Program {
                 Stock p : tablicat
                 ) {
             String co = p.getKupnoCzySprzedaz();
-            if (co.equals("KUPNO")) {
+            if (co.equals("K")) {
                 ZyskLubStrata -= p.getIle() * p.getPoIle();
             } // kupuje czyli jestem na minusie
 
@@ -973,7 +975,7 @@ public class Program {
                 Stock p : tablicat
                 ) {
             String co = p.getKupnoCzySprzedaz();
-            if (co.equals("KUPNO")) {
+            if (co.equals("K")) {
                 // ZyskLubStrata -= p.getIle() * p.getPoIle();
                 // TODO dlaczego wyszarzone
             } // kupuje czyli jestem na minusie
@@ -996,7 +998,7 @@ public class Program {
                 Stock p : tablicat
                 ) {
             String co = p.getKupnoCzySprzedaz();
-            if (co.equals("KUPNO")) {
+            if (co.equals("K")) {
                 ileMam += p.getIle();
 
             } else {
@@ -1045,7 +1047,7 @@ public class Program {
                 Stock p : tab
                 ) {
             String co = p.getKupnoCzySprzedaz();
-            if (co.equals("KUPNO")) {
+            if (co.equals("K")) {
                 sumaIloczynow += p.getPoIle() * p.getIle();
                 suma += p.getIle();
             } // else dla sprzedanych mozna policzyc zysk
@@ -1062,7 +1064,7 @@ public class Program {
                 ) {
             String co = p.getKupnoCzySprzedaz();
             // liczy sprzedane papiery
-            if (co.equals("KUPNO")) {
+            if (co.equals("K")) {
 
             } else {
                 ileSprzedanych += p.getIle();
@@ -1076,7 +1078,7 @@ public class Program {
                 ) {
             if (ileSprzedanych > 0) {
                 String co = p.getKupnoCzySprzedaz();
-                if (co.equals("KUPNO")) {
+                if (co.equals("K")) {
                     int d = p.getIle();
                     ileSprzedanych -= p.getIle();
                     p.setIle(0);
@@ -1160,7 +1162,7 @@ public class Program {
         int volume = 0;
         double prize = 0;
         String kindOfTransaction = null;
-        String[] transactionDate = null;
+        //String[] transactionDate = null;
         String[] nextLine = null;
         ArrayList<String[]> transactionTable = new ArrayList<String[]>();
         char MY_SEPARATOR = ';';
@@ -1190,18 +1192,19 @@ public class Program {
                     }});
                 }// this is the new history table with stock name, and it's all transaction in a table
 
-                transactionDate = line[0].split("-");
+                String[] transactionDateAsArray = (line[0].split("-"));
+                String transactionDate = transactionDateAsArray[0];
                 stockName = line[1];
                 kindOfTransaction = line[2];
-                volume = Integer.parseInt(line[3]);
-                prize = Double.parseDouble(line[4]);// kurs
+                volume = Integer.parseInt(line[3].replace(" ",""));
+                prize = Double.parseDouble(line[4].replace(",","."));// kurs
                 /* if (stockName.equals("DREWEX")){ System.out.println(stockName); } */
                 // zamiana na polskie znaki
-                if (kindOfTransaction.equals("KUPNO")) {
+                if (kindOfTransaction.equals("K")) {
                 } else {
-                    kindOfTransaction = "SPRZEDAZ";
+                    kindOfTransaction = "S";
                 }
-                /* TODO poprawić czytanie polskich znakow z kindOfTransaction = "SPRZEDAZ";// pliku csv */
+                /* TODO poprawić czytanie polskich znakow z kindOfTransaction = "S";// pliku csv */
                 //ArrayList wyciagnacz przed ifa / z ifa../..
                 // sprawdz czy juz istnieje taki papier
                 if (tablicaHistoriaTranzakcjiTemp.containsKey(stockName)) {
@@ -1232,11 +1235,11 @@ public class Program {
                 prize = Double.parseDouble(plikWTablicy.get(i)[4]);// kurs
                 *//* if (stockName.equals("DREWEX")){ System.out.println(stockName); } *//*
                 // zamiana na polskie znaki
-                if (kindOfTransaction.equals("KUPNO")) {
+                if (kindOfTransaction.equals("K")) {
                 } else {
-                    kindOfTransaction = "SPRZEDAZ";
+                    kindOfTransaction = "S";
                 }
-                *//* TODO poprawić czytanie polskich znakow z kindOfTransaction = "SPRZEDAZ";// pliku csv *//*
+                *//* TODO poprawić czytanie polskich znakow z kindOfTransaction = "S";// pliku csv *//*
                 //ArrayList wyciagnacz przed ifa / z ifa../..
                 // sprawdz czy juz istnieje taki papier
                 if (tablicaHistoriaTranzakcjiTemp.containsKey(stockName)) {

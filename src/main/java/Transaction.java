@@ -14,18 +14,23 @@ public class Transaction {
 
     public Transaction(String[] line) {
 
-        String[] dataAndTime = line[0].split("-");
-        String data = dataAndTime[0] + '-' + dataAndTime[1] + '-' + dataAndTime[2];
-        LocalDate myDate = LocalDate.parse(data);
+        String dataAndTime = line[0].substring(0, 10);//.split(".");//line[0].split(".");
+        String[] dateAsArray = dataAndTime.split("\\.");
+        int year = Integer.parseInt(dateAsArray[2]);
+        int month = Integer.parseInt(dateAsArray[1]);
+        int day = Integer.parseInt(dateAsArray[0]);
+        LocalDate myDate = new LocalDate(year,month, day);
         this.transactionDate = myDate;
         //  this.stockName = line[1];
-        this.volume = Integer.parseInt(line[3]);
-        this.prize = Double.parseDouble(line[4]);// kurs
+        String volumeAsString = line[3].replace(" ","");
+        this.volume = Integer.parseInt(volumeAsString);
+        String prizeAsString = line[4].replace(" ","").replace(",",".");
+        this.prize = Double.parseDouble(prizeAsString);// kurs
         this.value = volume * prize;
-        if (line[2].equals(TRANSACTION_TYPE.KUPNO.toString())) {
-            this.transaction = TRANSACTION_TYPE.KUPNO;
+        if (line[2].equals(TRANSACTION_TYPE.K.toString())) {
+            this.transaction = TRANSACTION_TYPE.K;
         } else {
-            this.transaction = TRANSACTION_TYPE.SPRZEDAZ;
+            this.transaction = TRANSACTION_TYPE.S;
         }
     }
 

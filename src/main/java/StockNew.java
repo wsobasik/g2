@@ -26,7 +26,7 @@ public class StockNew {
         this.transactionsList = transactions;
 /*
         for (Transaction transaction : transactions) {
-            if (transaction.getTransaction().equals(TRANSACTION_TYPE.KUPNO)) {
+            if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
                 this.actualVolume += transaction.getVolume();
             } else {
                 this.actualVolume -= transaction.getVolume();

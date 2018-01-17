@@ -1,3 +1,3 @@
 public enum TRANSACTION_TYPE {
-    KUPNO, SPRZEDAZ;
+    K, S;
 }
