@@ -41,16 +41,18 @@ public class Program {
         File downloadedFileNewConnect = new File(urlNC.toString()); // New Connect
 
 //TODO if downloaded today then stop downloading again
-     //   downloadNewFile(urlNC, savedFileNewConnect);
- //       downloadNewFile(urlMS, savedFileMainStock);
+        //   downloadNewFile(urlNC, savedFileNewConnect);
+        //       downloadNewFile(urlMS, savedFileMainStock);
 
 
         //wirdMethod(savedFileMainStock, downloadedFileNewConnect);
 
         Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(savedFileMainStock, savedFileNewConnect);
-        ArrayList
 
-        ArrayList<String[]> transactionTable = addTransactionsFromCSVFile(savedFileWithTransactions);//new
+        ArrayList<Transaction> transactionTable = addTransactionsFromCSVFile(savedFileWithTransactions);//new
+        //posortuj tranzakcje po nazwie i po dacie
+        //zamiast stock list utworz map
+
 
         ArrayList<SplitData> splitDataTable = addSplitData();//TODO from file in the future
         Map<String, StockNew> theListOfStocks =
@@ -61,14 +63,14 @@ public class Program {
         // przeczytaj plik z historii transakcji z pliku csv do tablicy
 
 
-
         Map<String, ArrayList<Transaction>> mapOfTransactions = createAMapOfTransactions(transactionTable);//new
-        ArrayList<StockNew> stockList = createStockList(actualStockPrize, mapOfTransactions);
+        ArrayList<StockNew> stockList = createStockList(actualStockPrize, mapOfTransactions);//TODO zmienic na mape name stock i dodac date splitu do stocku
+
 
         sortTransactionsAsceding(stockList);
         fillInTotalVolumeAfterTransaction(stockList);
         calculateSplit(stockList, "DREWEX", 10, new LocalDate(2015, 5, 10));
- //     calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
+        //     calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
         calculateSplit(stockList, "CIGAMES", 0.1, new LocalDate(2017, 1, 31));
         calculateSplit(stockList, "RESBUD", 5, new LocalDate(2017, 1, 13));
         calculateSplit(stockList, "01CYBATON", 0.05, new LocalDate(2015, 11, 25));
@@ -162,9 +164,17 @@ public class Program {
 
     }
 
-    private Map<String, StockNew> addStockPrizeAndTransactionHistory(ArrayList<SplitData> splitDataTable, ArrayList<String[]> transactionTable, Map<String, Double> actualStockPrize) {
+    private Map<String, StockNew> addStockPrizeAndTransactionHistory(ArrayList<SplitData> splitDataTable,
+                                                                     ArrayList<String[]> transactionTable,
+                                                                     Map<String, Double> actualStockPrize) {
 
-/*
+
+        // remenber about method change    correctStockNameIfHasChanged !!!
+        http:
+//www.manikrathee.com/how-to-create-a-branch-in-git.html
+
+
+        /*
         Map<String, ArrayList<Transaction>> aNewHistoryTransactionTable = new HashMap<>();
         ArrayList<Transaction> aNewTransactionTable = new ArrayList<>();
         String stockName;
@@ -191,16 +201,16 @@ public class Program {
 
 
 
-        return dupa;
+        return null;//TODO
     }
 
     private ArrayList<SplitData> addSplitData() {
         //TODO wczytac z pliku
-        ArrayList<SplitData> result = null;
-        result.add(new SplitData( "DREWEX", 10, new LocalDate(2015, 5, 10)));
-        result.add(new SplitData( "CIGAMES", 0.1, new LocalDate(2017, 1, 31)));
-        result.add(new SplitData( "RESBUD", 5, new LocalDate(2017, 1, 13)));
-        result.add(new SplitData( "01CYBATON", 0.05, new LocalDate(2015, 11, 25)));
+        ArrayList<SplitData> result = new ArrayList<>();
+        result.add(new SplitData("DREWEX", 10, new LocalDate(2015, 5, 10)));
+        result.add(new SplitData("CIGAMES", 0.1, new LocalDate(2017, 1, 31)));
+        result.add(new SplitData("RESBUD", 5, new LocalDate(2017, 1, 13)));
+        result.add(new SplitData("01CYBATON", 0.05, new LocalDate(2015, 11, 25)));
         return result;
     }
 
@@ -1243,8 +1253,8 @@ public class Program {
                 String transactionDate = transactionDateAsArray[0];
                 stockName = line[1];
                 kindOfTransaction = line[2];
-                volume = Integer.parseInt(line[3].replace(" ",""));
-                prize = Double.parseDouble(line[4].replace(",","."));// kurs
+                volume = Integer.parseInt(line[3].replace(" ", ""));
+                prize = Double.parseDouble(line[4].replace(",", "."));// kurs
                 /* if (stockName.equals("DREWEX")){ System.out.println(stockName); } */
                 // zamiana na polskie znaki
                 if (kindOfTransaction.equals("K")) {
@@ -1320,22 +1330,17 @@ public class Program {
     }
 
 
-    private static ArrayList<String[]> addTransactionsFromCSVFile(File savedTransactionsFile) {
+    private static ArrayList<Transaction> addTransactionsFromCSVFile(File savedTransactionsFile) {
 
         char MY_SEPARATOR = ';';
         int SKIP_LINES_NUMBER = 30;         // [0-29] smienic
-        ArrayList<String[]> transactionTable = new ArrayList<String[]>();
-        String[] nextLine;
-        //TODO try with resources
-        try {
-            CSVReader reader = new CSVReader(new FileReader(savedTransactionsFile), MY_SEPARATOR,
-                    CSVParser.DEFAULT_QUOTE_CHARACTER, SKIP_LINES_NUMBER);
-            try {
-                while ((nextLine = reader.readNext()) != null) {
-                    transactionTable.add(nextLine);
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+        ArrayList<Transaction> transactionTable = new ArrayList<>();
+        String[] lineFromFile;
+
+        try (CSVReader reader = new CSVReader(new FileReader(savedTransactionsFile), MY_SEPARATOR,
+                CSVParser.DEFAULT_QUOTE_CHARACTER, SKIP_LINES_NUMBER)) {
+            while ((lineFromFile = reader.readNext()) != null) {
+                transactionTable.add(new Transaction(lineFromFile)); // transaction with corrected name
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
