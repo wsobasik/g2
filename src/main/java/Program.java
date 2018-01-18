@@ -47,14 +47,19 @@ public class Program {
 
         //wirdMethod(savedFileMainStock, downloadedFileNewConnect);
 
-        Map<String, Double> actualStockPrize = addPresentStockPrizeToTheTable(savedFileMainStock, savedFileNewConnect);
+        Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(savedFileMainStock, savedFileNewConnect);
+        ArrayList
 
+        ArrayList<String[]> transactionTable = addTransactionsFromCSVFile(savedFileWithTransactions);//new
+
+        ArrayList<SplitData> splitDataTable = addSplitData();//TODO from file in the future
+        Map<String, StockNew> theListOfStocks =
+                addStockPrizeAndTransactionHistory(splitDataTable, transactionTable, actualStockPrize);
 
         // wirdMethod2(savedFileNewConnect, "New COnnect: \t");
-//        actualStockPrize.putAll(addPresentStockPrizeToTheTable(savedFileNewConnect));
+//        actualStockPrize.putAll(addPresentStockPrizeFromTxtFiles(savedFileNewConnect));
         // przeczytaj plik z historii transakcji z pliku csv do tablicy
 
-        ArrayList<String[]> transactionTable = readTransactionTableFromCSVFile(savedFileWithTransactions);//new
 
 
         Map<String, ArrayList<Transaction>> mapOfTransactions = createAMapOfTransactions(transactionTable);//new
@@ -63,7 +68,7 @@ public class Program {
         sortTransactionsAsceding(stockList);
         fillInTotalVolumeAfterTransaction(stockList);
         calculateSplit(stockList, "DREWEX", 10, new LocalDate(2015, 5, 10));
- //       calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
+ //     calculateSplit(stockList, "HERKULES", 5, new LocalDate(2012, 9, 19));
         calculateSplit(stockList, "CIGAMES", 0.1, new LocalDate(2017, 1, 31));
         calculateSplit(stockList, "RESBUD", 5, new LocalDate(2017, 1, 13));
         calculateSplit(stockList, "01CYBATON", 0.05, new LocalDate(2015, 11, 25));
@@ -155,6 +160,48 @@ public class Program {
          * szczegolny */
 
 
+    }
+
+    private Map<String, StockNew> addStockPrizeAndTransactionHistory(ArrayList<SplitData> splitDataTable, ArrayList<String[]> transactionTable, Map<String, Double> actualStockPrize) {
+
+/*
+        Map<String, ArrayList<Transaction>> aNewHistoryTransactionTable = new HashMap<>();
+        ArrayList<Transaction> aNewTransactionTable = new ArrayList<>();
+        String stockName;
+        int volume = 0;
+        double prize = 0;
+        String kindOfTransaction = null;
+        String[] transactionDate = null;
+
+
+        for (String[] line : transactionTable) {
+            Transaction aNewTransaction = new Transaction(line);
+
+            aNewTransactionTable.add(aNewTransaction);
+            stockName = line[1];
+            stockName = correctStockNameIfHasChanged(stockName);
+            if (aNewHistoryTransactionTable.containsKey(stockName)) {
+                aNewHistoryTransactionTable.get(stockName).add(aNewTransaction);
+
+            } else {
+                aNewHistoryTransactionTable.put(stockName, new ArrayList() {{
+                    add(aNewTransaction);
+                }});*/
+
+
+
+
+        return dupa;
+    }
+
+    private ArrayList<SplitData> addSplitData() {
+        //TODO wczytac z pliku
+        ArrayList<SplitData> result = null;
+        result.add(new SplitData( "DREWEX", 10, new LocalDate(2015, 5, 10)));
+        result.add(new SplitData( "CIGAMES", 0.1, new LocalDate(2017, 1, 31)));
+        result.add(new SplitData( "RESBUD", 5, new LocalDate(2017, 1, 13)));
+        result.add(new SplitData( "01CYBATON", 0.05, new LocalDate(2015, 11, 25)));
+        return result;
     }
 
     private void fillInTotalVolumeAfterTransaction(ArrayList<StockNew> stockList) {
@@ -1273,7 +1320,7 @@ public class Program {
     }
 
 
-    private static ArrayList<String[]> readTransactionTableFromCSVFile(File savedTransactionsFile) {
+    private static ArrayList<String[]> addTransactionsFromCSVFile(File savedTransactionsFile) {
 
         char MY_SEPARATOR = ';';
         int SKIP_LINES_NUMBER = 30;         // [0-29] smienic
@@ -1337,7 +1384,7 @@ public class Program {
         return stockName;
     }
 
-    private static Map<String, Double> addPresentStockPrizeToTheTable(File NCfile, File MSfile) {
+    private static Map<String, Double> addPresentStockPrizeFromTxtFiles(File NCfile, File MSfile) {
         Map<String, Double> tablicaCen = new HashMap<String, Double>();
 
         Scanner inputStreamNC = null, inputStreamMS = null;
