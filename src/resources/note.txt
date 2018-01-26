@@ -1,5 +1,43 @@
 drewex - 29.06.2015 1:10    [u mnie /10]
-herkules - NIE
+CIGAMES 23.02.2017 - dzielnik 10
+
+
+
+drewex
+Data 	Typ 	Nominalnie 	Dzielnik
+29.06.2015 	Podział 1.00 : 10.00 	- 	0.10000000
+
+cigames
+Data 	Typ 	Nominalnie 	Dzielnik
+23.02.2017 	Podział 1.00 : 10.00 	- 	10.00000000
+
+
+resbud
+Data 	Typ 	Nominalnie 	Dzielnik
+13.01.2017 	Podział 1.00 : 5.00 	- 	0.20000000
+
+
+
+01cybaton
+Data 	Typ 	Nominalnie 	Dzielnik
+25.11.2015 	Podział 20.00 : 1.00 	- 	20.00000000
+
+
+
+herkules   - poprawic
+19.09.2012 	Podział 1.00 : 5.00 	- 	0.20000000
+
+
+28.09.2017 	Dywidenda 	0.16 	1.04177547
+23.08.2016 	Dywidenda 	0.16 	1.05047321
+27.08.2015 	Dywidenda 	0.06 	1.01507533
+16.12.2010 	Prawo poboru 	0.48 	1.55172420
+01.07.2008 	Dywidenda 	0.06 	1.01857591
+21.02.2008 	Podział 5.00 : 1 	- 	5.00000000
+30.05.2007 	Prawo poboru 	8.11 	1.19603574
+
+
+
 cig - 31.01.2017  1:10    [u mnie /0.1  ]
 13.01.2017	RESBUD	1/5   [u mnie 0.0833]
 
@@ -7,6 +45,11 @@ cig - 31.01.2017  1:10    [u mnie /0.1  ]
 29.07.2016	RESBUD	4
 25.09.2014	RESBUD	4
 
+
+miraculum (czy wchodzi, raczej jest dobrze)
+04.06.2014	Podział 1.00 : 50.00	-	0.02000000
+dywidenda, split
+https://www.biznesradar.pl/operacje/01CYBERATON
 
 
 

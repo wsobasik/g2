@@ -2,18 +2,20 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
+import static java.lang.Integer.compare;
+
 public class StockNew {
 
 
     private String stockName;
     private Double historicalBuyValue;
     private Double historicalSoldValue;
-
     private Double actualPrize;
     private Integer actualVolume;
     private Double actualValue;
     private ArrayList<Transaction> transactionsList;
     private Double totalCashIfSellToday;
+    private ArrayList<SplitData> splitData;
 
     public StockNew(String stockName, Double actualStockPrize, ArrayList<Transaction> transactions) {
         this.stockName = stockName;
@@ -78,6 +80,9 @@ public class StockNew {
         this.actualPrize = actualPrize;
     }
 
+    public void setTotalCashIfSellToday(Double totalCashIfSellToday) {
+        this.totalCashIfSellToday = totalCashIfSellToday;
+    }
 
     public Integer getActualVolume() {
         return actualVolume;
@@ -103,6 +108,14 @@ public class StockNew {
         this.totalCashIfSellToday = round(actualValue + historicalSoldValue - historicalBuyValue, 2);
     }//TODO zaokraglanie
 
+    public ArrayList<SplitData> getSplitData() {
+        return splitData;
+    }
+
+    public void setSplitData(ArrayList<SplitData> splitData) {
+        this.splitData = splitData;
+    }
+
     @Override
     public String toString() {
         if (actualVolume == 0) {
@@ -119,4 +132,16 @@ public class StockNew {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
+
+    public int compareTo(StockNew s2) {
+
+        if (compare(this.getActualVolume(), s2.getActualVolume()) == 0) {
+            return compare(this.historicalSoldValue.intValue() - this.getHistoricalBuyValue().intValue(),
+                    s2.historicalSoldValue.intValue() - s2.getHistoricalBuyValue().intValue());
+        }
+        return compare(this.getActualVolume(), s2.getActualVolume());
+    }
+
+
 }
