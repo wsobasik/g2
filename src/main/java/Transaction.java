@@ -110,9 +110,10 @@ public class Transaction {
         if (stockName.equals("JUJUBEE-PDA")) {
             return "JUJUBEE";
         }
-        if (stockName.equals("SITE-NC")) {
-            return "SITE";
+        if (stockName.equals("SITE-NC") || (stockName.equals("SITE") )) {
+            return "FDGAMES";
         }
+
         if (stockName.equals("01CYBATON-NC")) {
             return "01CYBATON";
         }

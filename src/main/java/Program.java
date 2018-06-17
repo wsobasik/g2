@@ -1,6 +1,7 @@
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 import java.io.*;
@@ -15,10 +16,8 @@ import java.util.*;
 public class Program {
 
 
-    //        URL urlOfMainStockFile = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt");
     URL urlNC = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
-    URL urlMS = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt");
-
+    URL urlPG = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
     //        String file = "src/resources/ndohlcv.txt"; //TODO nieuzywane?
     File filesPathToResources = new File("src/resources");
 
@@ -33,27 +32,22 @@ public class Program {
         Map<String, PapierGlowna> tablicaPortfel;
         Map<String, ArrayList<Stock>> tablicaHistoriaTranzakcji;
 
-
         File savedFileMainStock = new File(filesPathToResources + "\\ndohlcv.txt");
         File savedFileNewConnect = new File(filesPathToResources + "\\NCndohlcv.txt");
         File savedFileWithTransactions = new File(filesPathToResources + "\\PROD._MAKL_.csv");
 
-        File downloadedFileNewConnect = new File(urlNC.toString()); // New Connect
-
-
-//TODO if downloaded today then stop downloading again
-//to stop download just comment belowed two lines
-        //if file date on the comp is the same as todays date than dont download i jest to dzien pracujacy
+        //if downloaded today then stop don't download again, don't download on saturday or sun the friday file
         LocalDate lastModified = new LocalDate(savedFileMainStock.lastModified());
         LocalDate today = new LocalDate(System.currentTimeMillis());
-        System.out.println("Ceny akcji z aktualne na dzień: " + lastModified);
-        if ((!today.isEqual(lastModified)) & (today.getDayOfWeek() < 6)) {
+        if ((!today.isEqual(lastModified)) || ((today.getDayOfWeek() > 5) &
+                (Days.daysBetween(today,lastModified).getDays()>2))) {
             downloadNewFile(urlNC, savedFileNewConnect);
-            downloadNewFile(urlMS, savedFileMainStock);
+            downloadNewFile(urlPG, savedFileMainStock);
         }
+        lastModified = new LocalDate(savedFileMainStock.lastModified());
+        System.out.println("Ceny akcji z aktualne na dzień: " + lastModified);
 
 
-        //wirdMethod(savedFileMainStock, downloadedFileNewConnect);
 
         Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(savedFileMainStock, savedFileNewConnect);
 
@@ -79,9 +73,7 @@ public class Program {
         System.out.println();
         //TODO posortowac
         //TODO formatiowanie, dywidenda, oplata za akcje, po ile kupilem srednio to co teraz mam
-//        http:
-//www.manikrathee.com/how-to-create-a-branch-in-git.html
-        // wirdMethod2(savedFileNewConnect, "New COnnect: \t");
+//        http://www.manikrathee.com/how-to-create-a-branch-in-git.html
 //        actualStockPrize.putAll(addPresentStockPrizeFromTxtFiles(savedFileNewConnect));
         // przeczytaj plik z historii transakcji z pliku csv do tablicy
 ///old
@@ -491,18 +483,6 @@ public class Program {
         FileUtils.copyURLToFile(url, file);
     }
 
-    private void wirdMethod2(File savedFileNewConnect, String s) {
-        String dzienTygEdycjiPliku2 = zwrocMiDzienTygZLonga(savedFileNewConnect.lastModified());
-        System.out.println(s + dzienTygEdycjiPliku2);        // PN, WT, SR CZW, PT - stworzyc liste/ enum i jesli mam z dnia poprzedniego to znaczy ze nie trzeba aktualizoawxc			//	System.out.println(dataModyfikacjiPliku2);			//metodkaKtoraMiZapiszeNajnowszyPlikNaDysk(urlNC, file);				// New Connect
-    }
-
-    private void wirdMethod(File savedFileMainStock, File downloadedFileNewConnect) {
-        wirdMethod2(downloadedFileNewConnect, "plik na serwerze jest z : ");
-        wirdMethod2(savedFileMainStock, "Rynek gl:\t");
-        String dzienTygTeraz = zwrocMiDzienTygZLonga(new Date().getTime());
-        System.out.println("Teraz:   \t" + dzienTygTeraz);        /* Date dataTeraz = new Date(); String dzienTygTeraz = new SimpleDateFormat("EEE").format(dataTeraz);// dzien zmieny		 * pliku1 System.out.println(dataTeraz); */        //System.out.println(dzienTygEdycjiPliku1);		// wystarczy raz dziennie uaktualnic //TODO jak to zautomatyzowac by nie		// trzebabylo komentowac tego
-        // metodkaKtoraMiZapiszeNajnowszyPlikNaDysk(urlOfMainStockFile, file);
-    }
 
 
     private static String zwrocMiDzienTygZLonga(Long dataModyfikacjiPliku1L) {
@@ -1280,7 +1260,7 @@ public class Program {
         }
 
         if (t.containsKey("SITE-NC")) {
-            t.put("SITE", t.remove("SITE-NC"));
+            t.put("FDGAMES", t.remove("SITE-NC"));
         }
 
         if (t.containsKey("01CYBATON-NC")) {
@@ -1476,8 +1456,9 @@ public class Program {
         if (stockName.equals("JUJUBEE-PDA")) {
             return "JUJUBEE";
         }
-        if (stockName.equals("SITE-NC")) {
-            return "SITE";
+
+        if (stockName.equals("SITE-NC") || stockName.equals("SITE")) {
+            return "FDGAMES";
         }
         if (stockName.equals("01CYBATON-NC")) {
             return "01CYBATON";
