@@ -1,11 +1,14 @@
 import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 import java.io.*;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -15,48 +18,35 @@ import java.util.*;
 
 public class Program {
 
+    private final String NEW_CONNECT_CURRENT_PRICE_FILE = "\\NCndohlcv.txt";
+    private final String PARKIET_GLOWNY_CURRENT_PRICE_FILE = "\\ndohlcv.txt";
+    private final String TRANSACTIONS_FILE = "\\PROD._MAKL_.csv";
+    File FILE_PATH_TO_RESOURCE = new File("src/resources");
+    URL NC_URL = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
+    URL PARKIET_GLOWNY_URL = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
 
-    URL urlNC = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
-    URL urlPG = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
-    //        String file = "src/resources/ndohlcv.txt"; //TODO nieuzywane?
-    File filesPathToResources = new File("src/resources");
 
-
-    public Program() throws MalformedURLException {
+    public Program() throws MalformedURLException, URISyntaxException {
     }
 
 
     public void init() throws ParseException, IOException {
 
+        File newConnectActualPrices = new File(FILE_PATH_TO_RESOURCE + NEW_CONNECT_CURRENT_PRICE_FILE);
+        File mainStockActualPrices = new File(FILE_PATH_TO_RESOURCE + PARKIET_GLOWNY_CURRENT_PRICE_FILE);
+        File listOfTransactions = new File(FILE_PATH_TO_RESOURCE + TRANSACTIONS_FILE);
 
+        newConnectActualPrices = downloadNewFile(NC_URL, newConnectActualPrices);
+        mainStockActualPrices = downloadNewFile(PARKIET_GLOWNY_URL, mainStockActualPrices);
+
+        ArrayList<Transaction> transactions = addTransactionsFromCSVFile(listOfTransactions);//new
         Map<String, PapierGlowna> tablicaPortfel;
         Map<String, ArrayList<Stock>> tablicaHistoriaTranzakcji;
-
-        File savedFileMainStock = new File(filesPathToResources + "\\ndohlcv.txt");
-        File savedFileNewConnect = new File(filesPathToResources + "\\NCndohlcv.txt");
-        File savedFileWithTransactions = new File(filesPathToResources + "\\PROD._MAKL_.csv");
-
-        //if downloaded today then stop don't download again, don't download on saturday or sun the friday file
-        LocalDate lastModified = new LocalDate(savedFileMainStock.lastModified());
-        LocalDate today = new LocalDate(System.currentTimeMillis());
-        if ((!today.isEqual(lastModified)) || ((today.getDayOfWeek() > 5) &
-                (Days.daysBetween(today,lastModified).getDays()>2))) {
-            downloadNewFile(urlNC, savedFileNewConnect);
-            downloadNewFile(urlPG, savedFileMainStock);
-        }
-        lastModified = new LocalDate(savedFileMainStock.lastModified());
-        System.out.println("Ceny akcji z aktualne na dzień: " + lastModified);
-
-
-
-        Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(savedFileMainStock, savedFileNewConnect);
-
-        ArrayList<Transaction> transactionTable = addTransactionsFromCSVFile(savedFileWithTransactions);//new
-        System.out.println("Dane tranzakcji do: " + transactionTable.get(0).getTransactionDate());
-        transactionTable.sort(Comparator.comparing(Transaction::getStockName).thenComparing(Transaction::getTransactionDate));
+        Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(mainStockActualPrices, newConnectActualPrices);
+        System.out.println("Dane tranzakcji do: " + transactions.get(0).getTransactionDate());
+        transactions.sort(Comparator.comparing(Transaction::getStockName).thenComparing(Transaction::getTransactionDate));
         Map<String, StockNew> theListOfStocks =
-                addStockPrizeAndTransactionHistory(transactionTable, actualStockPrize);
-
+                addStockPrizeAndTransactionHistory(transactions, actualStockPrize);
         addSplitData(theListOfStocks);//TODO from file in the future
         fullFillTransactionDetails(theListOfStocks); //split & values of transactions
         //     printItAllOut(theListOfStocks);
@@ -74,10 +64,10 @@ public class Program {
         //TODO posortowac
         //TODO formatiowanie, dywidenda, oplata za akcje, po ile kupilem srednio to co teraz mam
 //        http://www.manikrathee.com/how-to-create-a-branch-in-git.html
-//        actualStockPrize.putAll(addPresentStockPrizeFromTxtFiles(savedFileNewConnect));
+//        actualStockPrize.putAll(addPresentStockPrizeFromTxtFiles(newConnectActualPrices));
         // przeczytaj plik z historii transakcji z pliku csv do tablicy
 ///old
-        tablicaHistoriaTranzakcji = wczytajHistorieTranzakcjiZPlikuCSVDoTablicy(savedFileWithTransactions);
+        tablicaHistoriaTranzakcji = wczytajHistorieTranzakcjiZPlikuCSVDoTablicy(listOfTransactions);
         //ready
         //dopisac w miare potrzeb nowe akcje ktore trzeba zmienic
         poprawNazyAkcji(tablicaHistoriaTranzakcji);//zrobione i nie potrzebne
@@ -287,18 +277,18 @@ public class Program {
     private Map<String, StockNew> addStockPrizeAndTransactionHistory(ArrayList<Transaction> transactionTable,
                                                                      Map<String, Double> actualStockPrize) {
         String stockName;
-        Map<String, StockNew> result = new HashMap<>();
+        Map<String, StockNew> setOfStockNew = new HashMap<>();
         for (Transaction transaction : transactionTable) {
             stockName = transaction.getStockName();
-            if (result.containsKey(stockName)) {
-                result.get(stockName).getTransactionsList().add(transaction);
+            if (setOfStockNew.containsKey(stockName)) {
+                setOfStockNew.get(stockName).getTransactionsList().add(transaction);
             } else {
-                result.put(stockName, new StockNew(stockName, actualStockPrize.get(stockName), new ArrayList() {{
+                setOfStockNew.put(stockName, new StockNew(stockName, actualStockPrize.get(stockName), new ArrayList() {{
                     add(transaction);
                 }})); // dodaje nowyu  element do mapy
             }
         }
-        return result;
+        return setOfStockNew;
     }
 
     private void addSplitData(Map<String, StockNew> theListOfStocks) {
@@ -478,9 +468,24 @@ public class Program {
         return resultTable;
     }
 
-    private void downloadNewFile(URL url, File file) throws IOException {
-        file.createNewFile();
-        FileUtils.copyURLToFile(url, file);
+    private File downloadNewFile(URL url, File file) throws IOException {
+
+        //if downloaded today then stop don't download again, don't download on saturday or sun the friday file
+        LocalDate today = new LocalDate(System.currentTimeMillis());
+        LocalDate lastModified = new LocalDate(file.lastModified());
+
+        if ((!today.isEqual(lastModified)) || ((today.getDayOfWeek() > 5) &
+                (Days.daysBetween(today,lastModified).getDays()>2))) {
+//            downloadNewFile(url, file);
+            file.createNewFile();
+            FileUtils.copyURLToFile(url, file);
+        }
+  //      lastModified = new LocalDate(file.lastModified());
+        System.out.println("Ceny akcji z aktualne na dzień: " + lastModified);
+
+return file;
+
+
     }
 
 
@@ -1427,13 +1432,15 @@ public class Program {
     }
 
 
-    private static ArrayList<Transaction> addTransactionsFromCSVFile(File savedTransactionsFile) {
+    private  ArrayList<Transaction> addTransactionsFromCSVFile(File savedTransactionsFile) {
 
         char MY_SEPARATOR = ';';
         int SKIP_LINES_NUMBER = 23;         // [0-29] smienic
         ArrayList<Transaction> transactionTable = new ArrayList<>();
         String[] lineFromFile;
 
+        CSVParser parser = new CSVParserBuilder().withSeparator(MY_SEPARATOR).build();
+       // CSVReader reader = new CSVReaderBuilder(new StringReader(savedTransactionsFile));
         try (CSVReader reader = new CSVReader(new FileReader(savedTransactionsFile), MY_SEPARATOR,
                 CSVParser.DEFAULT_QUOTE_CHARACTER, SKIP_LINES_NUMBER)) {
             while ((lineFromFile = reader.readNext()) != null) {
