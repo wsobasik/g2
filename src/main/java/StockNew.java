@@ -1,3 +1,5 @@
+import org.joda.time.LocalDate;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -8,13 +10,17 @@ public class StockNew {
 
 
     private String stockName;
-    private Double historicalBuyValue;
-    private Double historicalSoldValue;
+    private Double totalPaidValueInCash;
+    private Double totalEarnValueInCash;
+    private ArrayList<Transaction> transactionsList;// is it really needed here??
+    private Double handsValueInCashWhenBought;
+    private Double handsAvgPricePaid;
+    private Double handsProfit;
+
+    private Double actualValueAtHand;//duble
+    private Double presentValueInCash;//duble zostawic jedno TODO
+    private Integer actualVolumeAtHand;
     private Double actualPrize;
-    private Integer actualVolume;
-    private Double actualValue;
-    private ArrayList<Transaction> transactionsList;
-    private Double totalCashIfSellToday;
     private ArrayList<SplitData> splitData;
 
     public StockNew(String stockName, Double actualStockPrize, ArrayList<Transaction> transactions) {
@@ -28,12 +34,12 @@ public class StockNew {
         this.transactionsList = transactions;
 /*
         for (Transaction transaction : transactions) {
-            if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
-                this.actualVolume += transaction.getVolume();
+            if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
+                this.actualVolumeAtHand += transaction.getVolumeOfTransaction();
             } else {
-                this.actualVolume -= transaction.getVolume();
+                this.actualVolumeAtHand -= transaction.getVolumeOfTransaction();
             }
-            actualValue;
+            actualValueAtHand;
         }
 */
         //TODO dodac inicjalizacje pozostalych pol
@@ -48,20 +54,20 @@ public class StockNew {
         this.stockName = stockName;
     }
 
-    public Double getHistoricalBuyValue() {
-        return historicalBuyValue;
+    public Double getTotalPaidValueInCash() {
+        return totalPaidValueInCash;
     }
 
-    public void setHistoricalBuyValue(Double historicalBuyValue) {
-        this.historicalBuyValue = historicalBuyValue;
+    public void setTotalBuyerAmountOfCash(Double historicalBuyValue) {
+        this.totalPaidValueInCash = historicalBuyValue;
     }
 
-    public Double getHistoricalSoldValue() {
-        return historicalSoldValue;
+    public Double getTotalEarnValueInCash() {
+        return totalEarnValueInCash;
     }
 
-    public void setHistoricalSoldValue(Double historicalSoldValue) {
-        this.historicalSoldValue = historicalSoldValue;
+    public void setTotalSalesAmountOfCash(Double historicalSoldValue) {
+        this.totalEarnValueInCash = historicalSoldValue;
     }
 
     public ArrayList<Transaction> getTransactionsList() {
@@ -80,32 +86,32 @@ public class StockNew {
         this.actualPrize = actualPrize;
     }
 
-    public void setTotalCashIfSellToday(Double totalCashIfSellToday) {
-        this.totalCashIfSellToday = totalCashIfSellToday;
+    public void setPresentValueInCash(Double presentValueInCash) {
+        this.presentValueInCash = presentValueInCash;
     }
 
-    public Integer getActualVolume() {
-        return actualVolume;
+    public Integer getActualVolumeAtHand() {
+        return actualVolumeAtHand;
     }
 
-    public void setActualVolume(Integer actualVolume) {
-        this.actualVolume = actualVolume;
+    public void setActualVolumeAtHand(Integer actualVolumeAtHand) {
+        this.actualVolumeAtHand = actualVolumeAtHand;
     }
 
-    public Double getActualValue() {
-        return actualValue;
+    public Double getActualValueAtHand() {
+        return actualValueAtHand;
     }
 
-    public void setActualValue(Double actualValue) {
-        this.actualValue = actualValue;
+    public void setActualValueAtHand(Double actualValueAtHand) {
+        this.actualValueAtHand = actualValueAtHand;
     }
 
-    public Double getTotalCashIfSellToday() {
-        return totalCashIfSellToday;
+    public Double getPresentValueInCash() {
+        return presentValueInCash;
     }
 
     public void setTotalCashIfSellToday() {
-        this.totalCashIfSellToday = round(actualValue + historicalSoldValue - historicalBuyValue, 2);
+        this.presentValueInCash = round(actualValueAtHand + totalEarnValueInCash - totalPaidValueInCash, 2);
     }//TODO zaokraglanie
 
     public ArrayList<SplitData> getSplitData() {
@@ -118,10 +124,10 @@ public class StockNew {
 
     @Override
     public String toString() {
-        if (actualVolume == 0) {
-            return stockName + " " + totalCashIfSellToday + "\n";
+        if (actualVolumeAtHand == 0) {
+            return stockName + " " + presentValueInCash + "\n";
         } else
-            return stockName + " Ile: " + actualVolume + " obcn: " + actualPrize + " Na Rece: " + actualValue + " cashIfSoldToday:" + totalCashIfSellToday + "\n";
+            return stockName + " Ile: " + actualVolumeAtHand + " obcn: " + actualPrize + " Na Rece: " + actualValueAtHand + " cashIfSoldToday:" + presentValueInCash + "\n";
     }
 
 
@@ -136,11 +142,11 @@ public class StockNew {
 
     public int compareTo(StockNew s2) {
 
-        if (compare(this.getActualVolume(), s2.getActualVolume()) == 0) {
-            return compare(this.historicalSoldValue.intValue() - this.getHistoricalBuyValue().intValue(),
-                    s2.historicalSoldValue.intValue() - s2.getHistoricalBuyValue().intValue());
+        if (compare(this.getActualVolumeAtHand(), s2.getActualVolumeAtHand()) == 0) {
+            return compare(this.totalEarnValueInCash.intValue() - this.getTotalPaidValueInCash().intValue(),
+                    s2.totalEarnValueInCash.intValue() - s2.getTotalPaidValueInCash().intValue());
         }
-        return compare(this.getActualVolume(), s2.getActualVolume());
+        return compare(this.getActualVolumeAtHand(), s2.getActualVolumeAtHand());
     }
 
 

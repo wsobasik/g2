@@ -1,39 +1,27 @@
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
+import org.joda.time.format.DateTimeFormat;
 
 
 public class Transaction {
 
     private String stockName;
     private LocalDate transactionDate;
-    private TRANSACTION_TYPE transaction;
-    private int volume;
+    private TRANSACTION_TYPE transactionType;
+    private int volumeOfTransaction;
     private Integer volumeBeforeTransaction;
     private Integer volumeAfterTransaction;
-    private double prize;
-    private double value;
+    private double priceOfStockInTransaction;
+    private double valueOfTransactionInCash;
+
 
     public Transaction(String[] line) {
-
-        String dataAndTime = line[0].substring(0, 10);//.split(".");//line[0].split(".");
-        String[] dateAsArray = dataAndTime.split("\\.");
-        int year = Integer.parseInt(dateAsArray[2]);
-        int month = Integer.parseInt(dateAsArray[1]);
-        int day = Integer.parseInt(dateAsArray[0]);
-        LocalDate myDate = new LocalDate(year, month, day);
-        this.transactionDate = myDate;
+        this.transactionDate =  LocalDateTime.parse(line[0], DateTimeFormat.forPattern("DD.MM.YYY HH:mm:ss")).toLocalDate();
         this.stockName = correctStockNameIfHasChanged(line[1]);
-        if (line[2].equals(TRANSACTION_TYPE.K.toString())) {
-            this.transaction = TRANSACTION_TYPE.K;
-        } else {
-            this.transaction = TRANSACTION_TYPE.S;
-        }
-        String volumeAsString = line[3].replace(" ", "");
-        this.volume = Integer.parseInt(volumeAsString);
-        //this.volumeBeforeTransaction = 0;  it is null
-       // this.volumeAfterTransaction = volume;
-        String prizeAsString = line[4].replace(" ", "").replace(",", ".");
-        this.prize = Double.parseDouble(prizeAsString);// kurs
-        this.value = volume * prize;
+        this.transactionType = (line[2].equals("K") ? TRANSACTION_TYPE.K : TRANSACTION_TYPE.S);
+        this.volumeOfTransaction = Integer.parseInt(line[3].replace(" ", ""));
+        this.priceOfStockInTransaction = Double.parseDouble(line[4].replace(" ", "").replace(",", "."));
+        this.valueOfTransactionInCash = volumeOfTransaction * priceOfStockInTransaction;
     }
 
 
@@ -45,28 +33,28 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    public double getValue() {
-        return value;
+    public double getValueOfTransactionInCash() {
+        return valueOfTransactionInCash;
     }
 
-    public void setValue(double value) {
-        this.value = value;
+    public void setValueOfTransactionInCash(double valueOfTransactionInCash) {
+        this.valueOfTransactionInCash = valueOfTransactionInCash;
     }
 
-    public TRANSACTION_TYPE getTransaction() {
-        return transaction;
+    public TRANSACTION_TYPE getTransactionType() {
+        return transactionType;
     }
 
-    public void setTransaction(TRANSACTION_TYPE transaction) {
-        this.transaction = transaction;
+    public void setTransactionType(TRANSACTION_TYPE transactionType) {
+        this.transactionType = transactionType;
     }
 
-    public int getVolume() {
-        return volume;
+    public int getVolumeOfTransaction() {
+        return volumeOfTransaction;
     }
 
-    public void setVolume(int volume) {
-        this.volume = volume;
+    public void setVolumeOfTransaction(int volumeOfTransaction) {
+        this.volumeOfTransaction = volumeOfTransaction;
     }
 
     public Integer getVolumeBeforeTransaction() {
@@ -77,12 +65,12 @@ public class Transaction {
         this.volumeBeforeTransaction = beforeTransactionVolume;
     }
 
-    public double getPrize() {
-        return prize;
+    public double getPriceOfStockInTransaction() {
+        return priceOfStockInTransaction;
     }
 
-    public void setPrize(double prize) {
-        this.prize = prize;
+    public void setPriceOfStockInTransaction(double priceOfStockInTransaction) {
+        this.priceOfStockInTransaction = priceOfStockInTransaction;
     }
 
     public int getVolumeAfterTransaction() {

@@ -8,7 +8,6 @@ import org.joda.time.LocalDate;
 
 import java.io.*;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -18,56 +17,57 @@ import java.util.*;
 
 public class Program {
 
+    private final File FILE_PATH_TO_RESOURCE = new File("src/resources");
     private final String NEW_CONNECT_CURRENT_PRICE_FILE = "\\NCndohlcv.txt";
     private final String PARKIET_GLOWNY_CURRENT_PRICE_FILE = "\\ndohlcv.txt";
     private final String TRANSACTIONS_FILE = "\\PROD._MAKL_.csv";
-    File FILE_PATH_TO_RESOURCE = new File("src/resources");
-    URL NC_URL = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
-    URL PARKIET_GLOWNY_URL = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
+    private final URL NC_URL = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
+    private final URL PARKIET_GLOWNY_URL = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
 
 
-    public Program() throws MalformedURLException, URISyntaxException {
+    public Program() throws MalformedURLException {
     }
 
 
     public void init() throws ParseException, IOException {
 
-        File newConnectActualPrices = new File(FILE_PATH_TO_RESOURCE + NEW_CONNECT_CURRENT_PRICE_FILE);
-        File mainStockActualPrices = new File(FILE_PATH_TO_RESOURCE + PARKIET_GLOWNY_CURRENT_PRICE_FILE);
-        File listOfTransactions = new File(FILE_PATH_TO_RESOURCE + TRANSACTIONS_FILE);
+        File fileOfNewConnectActualPrices = new File(FILE_PATH_TO_RESOURCE + NEW_CONNECT_CURRENT_PRICE_FILE);
+        File fileOfMainStockActualPrices = new File(FILE_PATH_TO_RESOURCE + PARKIET_GLOWNY_CURRENT_PRICE_FILE);
+        File fileOfTransactions = new File(FILE_PATH_TO_RESOURCE + TRANSACTIONS_FILE);
 
-        newConnectActualPrices = downloadNewFile(NC_URL, newConnectActualPrices);
-        mainStockActualPrices = downloadNewFile(PARKIET_GLOWNY_URL, mainStockActualPrices);
+        fileOfNewConnectActualPrices = downloadNewFile(NC_URL, fileOfNewConnectActualPrices);
+        fileOfMainStockActualPrices = downloadNewFile(PARKIET_GLOWNY_URL, fileOfMainStockActualPrices);
 
-        ArrayList<Transaction> transactions = addTransactionsFromCSVFile(listOfTransactions);//new
-        Map<String, PapierGlowna> tablicaPortfel;
-        Map<String, ArrayList<Stock>> tablicaHistoriaTranzakcji;
-        Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(mainStockActualPrices, newConnectActualPrices);
-        System.out.println("Dane tranzakcji do: " + transactions.get(0).getTransactionDate());
-        transactions.sort(Comparator.comparing(Transaction::getStockName).thenComparing(Transaction::getTransactionDate));
-        Map<String, StockNew> theListOfStocks =
-                addStockPrizeAndTransactionHistory(transactions, actualStockPrize);
-        addSplitData(theListOfStocks);//TODO from file in the future
-        fullFillTransactionDetails(theListOfStocks); //split & values of transactions
-        //     printItAllOut(theListOfStocks);
+        ArrayList<Transaction> listOfTransactions = addTransactionsFromCSVFile(fileOfTransactions);//new
+        System.out.println("Dane tranzakcji do: " + listOfTransactions.get(0).getTransactionDate());//najswiezsza tranzakcja na gorze?
+        Map<String, Double> actualStockPrize = addPresentStockPrizeFromTxtFiles(fileOfMainStockActualPrices, fileOfNewConnectActualPrices);
+
+        listOfTransactions.sort(Comparator.comparing(Transaction::getStockName).thenComparing(Transaction::getTransactionDate));
+
+
+        Map<String, StockNew> myVallet =
+                addPresentStockPrizeAndTransactionHistoryToTheMap(listOfTransactions, actualStockPrize);
+
+
+        addSplitData(myVallet);//TODO from file in the future
+        Vallet vallet = new Vallet(myVallet);
+        calculateMyValletDeals(myVallet); //split & values of transactions
+        //     printItAllOut(myVallet);
         System.out.println();
-
         ArrayList<StockNew> sortedByVolume = new ArrayList<>();
         ArrayList<StockNew> finalSortedByVolume = sortedByVolume;
-        theListOfStocks.forEach((key, value) -> {
+        myVallet.forEach((key, value) -> {
             finalSortedByVolume.add(value);
         });
         finalSortedByVolume.sort((s1, s2) -> s1.compareTo(s2));
         printItAllOut(finalSortedByVolume);
         System.out.println();
         System.out.println();
-        //TODO posortowac
-        //TODO formatiowanie, dywidenda, oplata za akcje, po ile kupilem srednio to co teraz mam
-//        http://www.manikrathee.com/how-to-create-a-branch-in-git.html
-//        actualStockPrize.putAll(addPresentStockPrizeFromTxtFiles(newConnectActualPrices));
-        // przeczytaj plik z historii transakcji z pliku csv do tablicy
-///old
-        tablicaHistoriaTranzakcji = wczytajHistorieTranzakcjiZPlikuCSVDoTablicy(listOfTransactions);
+
+        //--------------------------------------------
+        Map<String, PapierGlowna> tablicaPortfel;//zamienic na tablice z powrotem?!
+        Map<String, ArrayList<Stock>> tablicaHistoriaTranzakcji;//old
+        tablicaHistoriaTranzakcji = wczytajHistorieTranzakcjiZPlikuCSVDoTablicy(fileOfTransactions);
         //ready
         //dopisac w miare potrzeb nowe akcje ktore trzeba zmienic
         poprawNazyAkcji(tablicaHistoriaTranzakcji);//zrobione i nie potrzebne
@@ -142,6 +142,82 @@ public class Program {
 
     }
 
+    private ArrayList<Transaction> addTransactionsFromCSVFile(File savedTransactionsFile) {
+
+        final char MY_SEPARATOR = ';';
+        final int SKIP_LINES_NUMBER = 23;         // [0-29] smienic
+        ArrayList<Transaction> transactionTable = new ArrayList<>();
+        String[] lineFromFile;
+
+        CSVParser parser = new CSVParserBuilder().withSeparator(MY_SEPARATOR).build();
+
+
+        try (
+                FileReader reader = new FileReader(savedTransactionsFile);
+                CSVReader csvReader = new CSVReaderBuilder(reader).withCSVParser(parser).withSkipLines(SKIP_LINES_NUMBER).build()
+        ) {
+            while ((lineFromFile = csvReader.readNext()) != null) {
+                transactionTable.add(new Transaction(lineFromFile)); // transaction with corrected name
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return transactionTable;
+    }
+
+    private  Map<String, Double> addPresentStockPrizeFromTxtFiles(File NCfile, File MSfile) {
+        Map<String, Double> presentStockPricesMap = new HashMap<String, Double>();
+
+        double aktualnaCena;
+        String nazwaAkcji;
+
+        try (Scanner fileWithActualPrices = new Scanner(MSfile)){
+
+            while (fileWithActualPrices.hasNext()) {
+                String data = fileWithActualPrices.next();
+                String[] values = data.split(",");
+                nazwaAkcji = values[0];
+                aktualnaCena = Double.parseDouble(values[5]);
+                presentStockPricesMap.put(nazwaAkcji, aktualnaCena);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try(Scanner fileWithActualNCPrices = new Scanner((NCfile))) {
+            while (fileWithActualNCPrices.hasNext()) {
+                String data = fileWithActualNCPrices.next();
+                String[] values = data.split(",");
+                nazwaAkcji = values[0];
+                aktualnaCena = Double.parseDouble(values[5]);
+                presentStockPricesMap.put(nazwaAkcji, aktualnaCena);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return presentStockPricesMap;
+    }
+
+
+/*
+        try (CSVReader reader = new CSVReader(new FileReader(savedTransactionsFile), MY_SEPARATOR,
+                CSVParser.DEFAULT_QUOTE_CHARACTER, SKIP_LINES_NUMBER)) {
+            while ((lineFromFile = reader.readNext()) != null) {
+                transactionTable.add(new Transaction(lineFromFile)); // transaction with corrected name
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+    //   }
+
+
+
+
+
     private void printItAllOut(ArrayList<StockNew> finalSortedByVolume) {
         Double totalPerAll = 0.0;
         Double totalMinus = 0.0;
@@ -149,11 +225,11 @@ public class Program {
 
         for (StockNew stock : finalSortedByVolume) {
             String stockName = stock.getStockName();
-            Double totalPerStock = stock.getTotalCashIfSellToday();
+            Double totalPerStock = stock.getPresentValueInCash();
             totalPerAll += totalPerStock;
 
-            if (stock.getActualVolume() == 0) { //wyswietlanie dla zera volume
-                System.out.printf("%10s %.2f", stockName, stock.getTotalCashIfSellToday());
+            if (stock.getActualVolumeAtHand() == 0) { //wyswietlanie dla zera volume
+                System.out.printf("%10s %.2f", stockName, stock.getPresentValueInCash());
                 System.out.println();
 
             } else
@@ -162,27 +238,27 @@ public class Program {
                 //TODO zastapic metoda
                 System.out.printf("%10s %8.2f  %5s",
                         stockName,  //%10s
-                        stock.getTotalCashIfSellToday(),   //%8.2f
-                        stock.getActualVolume());           //%5s
+                        stock.getPresentValueInCash(),   //%8.2f
+                        stock.getActualVolumeAtHand());           //%5s
                 System.out.printf("%3s", " x ");
                 System.out.printf("%.2f  %8.2f",
                         stock.getActualPrize(),          //%.2f
-                        stock.getActualValue());         //%5s
-                if (stock.getTotalCashIfSellToday() < 0) {
-                    totalMinus += stock.getTotalCashIfSellToday();
-                    //  System.out.printf("%8.2f", Math.abs(stock.getTotalCashIfSellToday() / stock.getActualVolume()));
+                        stock.getActualValueAtHand());         //%5s
+                if (stock.getPresentValueInCash() < 0) {
+                    totalMinus += stock.getPresentValueInCash();
+                    //  System.out.printf("%8.2f", Math.abs(stock.getPresentValueInCash() / stock.getActualVolumeAtHand()));
                     System.out.printf("%8.2f", stock.getActualPrize());
 
                 }
-                actualValueOfAll += stock.getTotalCashIfSellToday();
+                actualValueOfAll += stock.getPresentValueInCash();
                 System.out.println();
   /*              System.out.printf("%7s%10s%.2f", "Nazwa:", stockName, stock.getActualPrize());
                 System.out.println();
                 System.out.printf("%10s %.2f", "Nazwa:", stock.getActualPrize());
   */
-    /*            System.out.println(stockName + " : " + stock.getActualVolume() + " : " +
-                        stock.getActualPrize() + " = " + stock.getActualValue() + " - " + stock.getHistoricalBuyValue() +
-                        " + " + stock.getHistoricalSoldValue() + " : " + totalPerStock);*/
+    /*            System.out.println(stockName + " : " + stock.getActualVolumeAtHand() + " : " +
+                        stock.getActualPrize() + " = " + stock.getActualValueAtHand() + " - " + stock.getTotalPaidValueInCash() +
+                        " + " + stock.getTotalEarnValueInCash() + " : " + totalPerStock);*/
             }
             totalPerAll += totalPerStock;
 
@@ -205,26 +281,27 @@ public class Program {
         Double totalPerAll = 0.0;
         for (String stockName : theListOfStocks.keySet()) {
             StockNew stock = theListOfStocks.get(stockName);
-            Double totalPerStock = stock.getTotalCashIfSellToday();
+            Double totalPerStock = stock.getPresentValueInCash();
             totalPerAll += totalPerStock;
 
-            System.out.println(stockName + " : " + stock.getActualVolume() + " : " +
-                    stock.getActualPrize() + " = " + stock.getActualValue() + " - " + stock.getHistoricalBuyValue() +
-                    " + " + stock.getHistoricalSoldValue() + " : " + totalPerStock);
+            System.out.println(stockName + " : " + stock.getActualVolumeAtHand() + " : " +
+                    stock.getActualPrize() + " = " + stock.getActualValueAtHand() + " - " + stock.getTotalPaidValueInCash() +
+                    " + " + stock.getTotalEarnValueInCash() + " : " + totalPerStock);
             totalPerAll += totalPerStock;
 
         }
         System.out.println(totalPerAll);
     }
 
-    private void fullFillTransactionDetails(Map<String, StockNew> theListOfStocks) {
-        Integer beforeAfter = 0;
+    //TODO ogarnac magie
+    private void calculateMyValletDeals(Map<String, StockNew> myVallet) {
+        Integer beforeAfter;
         boolean splitFound;
-        for (StockNew stock : theListOfStocks.values()) {
-            Double historicalBuyValue = 0.0;
-            Double historicalSellValue = 0.0;
-            beforeAfter = 0;
 
+        for (StockNew stock : myVallet.values()) {
+            Double totalCost = 0.0;
+            Double totalIncome = 0.0;
+            beforeAfter = 0;
             splitFound = false;
             if (stock.getSplitData() != null) {
                 double ratio = stock.getSplitData().get(0).getRatio();//zakladam ze tylko sie zdarzyl raz
@@ -237,16 +314,16 @@ public class Program {
                     } else {
                         transaction.setVolumeBeforeTransaction(beforeAfter); // no split
                     }
-                    if (TRANSACTION_TYPE.K.equals(transaction.getTransaction())) {
-                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() + transaction.getVolume());
-                        historicalBuyValue += transaction.getVolume() * transaction.getPrize();
+                    if (TRANSACTION_TYPE.K.equals(transaction.getTransactionType())) {
+                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() + transaction.getVolumeOfTransaction());
+                        totalCost += transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction();
                     } else {
-                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() - transaction.getVolume());
-                        historicalSellValue += transaction.getVolume() * transaction.getPrize();
+                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() - transaction.getVolumeOfTransaction());
+                        totalIncome += transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction();
 //dla cigames pokazuje 900 zamiast 0 !!
                     }
                     beforeAfter = transaction.getVolumeAfterTransaction();
-                    transaction.setValue(transaction.getVolume() * transaction.getPrize());
+                    transaction.setValueOfTransactionInCash(transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction());
 
                 }
 
@@ -255,30 +332,31 @@ public class Program {
                 for (Transaction transaction : stock.getTransactionsList()) {
                     transaction.setVolumeBeforeTransaction(beforeAfter);
 //
-                    if (TRANSACTION_TYPE.K.equals(transaction.getTransaction())) {
-                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() + transaction.getVolume());
-                        historicalBuyValue += transaction.getVolume() * transaction.getPrize();
+                    if (TRANSACTION_TYPE.K.equals(transaction.getTransactionType())) {
+                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() + transaction.getVolumeOfTransaction());
+                        totalCost += transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction();
                     } else {
-                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() - transaction.getVolume());
-                        historicalSellValue += transaction.getVolume() * transaction.getPrize();
+                        transaction.setVolumeAfterTransaction(transaction.getVolumeBeforeTransaction() - transaction.getVolumeOfTransaction());
+                        totalIncome += transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction();
                     }
                     beforeAfter = transaction.getVolumeAfterTransaction();
-                    transaction.setValue(transaction.getVolume() * transaction.getPrize());
+                    transaction.setValueOfTransactionInCash(transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction());
                 }
             }
-            stock.setActualVolume(beforeAfter);
-            stock.setActualValue(beforeAfter * stock.getActualPrize());
-            stock.setHistoricalBuyValue(historicalBuyValue);
-            stock.setHistoricalSoldValue(historicalSellValue);
-            stock.setTotalCashIfSellToday(historicalSellValue - historicalBuyValue + stock.getActualValue());
+            stock.setActualVolumeAtHand(beforeAfter);
+            stock.setActualValueAtHand(beforeAfter * stock.getActualPrize());
+            stock.setTotalBuyerAmountOfCash(totalCost);
+            stock.setTotalSalesAmountOfCash(totalIncome);
+            stock.setPresentValueInCash(totalIncome - totalCost + stock.getActualValueAtHand());
         }
     }
 
-    private Map<String, StockNew> addStockPrizeAndTransactionHistory(ArrayList<Transaction> transactionTable,
-                                                                     Map<String, Double> actualStockPrize) {
+//TODO zmienic na tablice ?
+    private Map<String, StockNew> addPresentStockPrizeAndTransactionHistoryToTheMap(ArrayList<Transaction> listOfTransactions,
+                                                                                    Map<String, Double> actualStockPrize) {
         String stockName;
         Map<String, StockNew> setOfStockNew = new HashMap<>();
-        for (Transaction transaction : transactionTable) {
+        for (Transaction transaction : listOfTransactions) {
             stockName = transaction.getStockName();
             if (setOfStockNew.containsKey(stockName)) {
                 setOfStockNew.get(stockName).getTransactionsList().add(transaction);
@@ -297,9 +375,7 @@ public class Program {
         theListOfStocks.get("DREWEX").setSplitData(new ArrayList<SplitData>() {{
             add(new SplitData("DREWEX", 10, new LocalDate(2015, 6, 29)));
         }});
-
         theListOfStocks.get("CIGAMES").setSplitData(new ArrayList<SplitData>() {{
-
             add(new SplitData("CIGAMES", 0.1, new LocalDate(2017, 2, 23))); //odwrocic dzielnik
         }});
         theListOfStocks.get("RESBUD").setSplitData(new ArrayList<SplitData>() {{
@@ -308,11 +384,9 @@ public class Program {
         theListOfStocks.get("01CYBATON").setSplitData(new ArrayList<SplitData>() {{
             add(new SplitData("01CYBATON", 0.05, new LocalDate(2015, 11, 25)));
         }});
-
         theListOfStocks.get("HERKULES").setSplitData(new ArrayList<SplitData>() {{
             add(new SplitData("HERKULES", 5, new LocalDate(2012, 9, 19)));
         }});
-
     }
 
     private void fillInTotalVolumeAfterTransaction(ArrayList<StockNew> stockList) {
@@ -321,13 +395,13 @@ public class Program {
             for (int i = 0; i < transactionsList.size(); i++) {
                 Transaction transaction = transactionsList.get(i);
                 if (i > 0) {
-                    if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
-                        transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() + transaction.getVolume());
+                    if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
+                        transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() + transaction.getVolumeOfTransaction());
                     } else {
-                        transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() - transaction.getVolume());
+                        transaction.setVolumeAfterTransaction(transactionsList.get(i - 1).getVolumeAfterTransaction() - transaction.getVolumeOfTransaction());
                     }
                 } else {
-                    transaction.setVolumeAfterTransaction(transaction.getVolume());
+                    transaction.setVolumeAfterTransaction(transaction.getVolumeOfTransaction());
                 }
             }
         }
@@ -357,18 +431,18 @@ public class Program {
                         if (splitFalg == false) {
 
                             previousTransaction.setVolumeAfterTransaction((int) (previousTransaction.getVolumeAfterTransaction() / splitValue));
-                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
-                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolume());
+                            if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolumeOfTransaction());
                             } else {
-                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolume());
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolumeOfTransaction());
                             }
                             splitFalg = true;
                         } else // przeliczyc pozostale VolumeAfterTransaction TODO przeniesc to do orginalnej metody
                         {
-                            if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
-                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolume());
+                            if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() + transaction.getVolumeOfTransaction());
                             } else {
-                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolume());
+                                transaction.setVolumeAfterTransaction(previousTransaction.getVolumeAfterTransaction() - transaction.getVolumeOfTransaction());
                             }
                         }
                     }
@@ -389,10 +463,10 @@ public class Program {
 
 
             for (Transaction transaction : stock.getTransactionsList()) {
-                int volume = transaction.getVolume();
-                double value = transaction.getValue();
+                int volume = transaction.getVolumeOfTransaction();
+                double value = transaction.getValueOfTransactionInCash();
 
-                if (transaction.getTransaction().equals(TRANSACTION_TYPE.K)) {
+                if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
                     historicalBuyValue += value;
                     buyVolume += volume;
                 } else {
@@ -401,12 +475,12 @@ public class Program {
                 }
             }
             int actualVolume = buyVolume - sellVolume;
-            stock.setActualVolume(actualVolume);
-            stock.setActualValue(actualVolume * stock.getActualPrize());
-            stock.setHistoricalBuyValue(historicalBuyValue);
-            stock.setHistoricalSoldValue(historicalSoldValue);
+            stock.setActualVolumeAtHand(actualVolume);
+            stock.setActualValueAtHand(actualVolume * stock.getActualPrize());
+            stock.setTotalBuyerAmountOfCash(historicalBuyValue);
+            stock.setTotalSalesAmountOfCash(historicalSoldValue);
             stock.setTotalCashIfSellToday();
-            totalResultIfSoldToday += stock.getTotalCashIfSellToday();
+            totalResultIfSoldToday += stock.getPresentValueInCash();
         }
 
         System.out.println("Total since the beginign: " + totalResultIfSoldToday);
@@ -418,10 +492,6 @@ public class Program {
         Map<String, ArrayList<Transaction>> aNewHistoryTransactionTable = new HashMap<>();
         ArrayList<Transaction> aNewTransactionTable = new ArrayList<>();
         String stockName;
-        int volume = 0;
-        double prize = 0;
-        String kindOfTransaction = null;
-        String[] transactionDate = null;
 
 
         for (String[] line : transactionTable) {
@@ -475,19 +545,18 @@ public class Program {
         LocalDate lastModified = new LocalDate(file.lastModified());
 
         if ((!today.isEqual(lastModified)) || ((today.getDayOfWeek() > 5) &
-                (Days.daysBetween(today,lastModified).getDays()>2))) {
+                (Days.daysBetween(today, lastModified).getDays() > 2))) {
 //            downloadNewFile(url, file);
             file.createNewFile();
             FileUtils.copyURLToFile(url, file);
         }
-  //      lastModified = new LocalDate(file.lastModified());
+        //      lastModified = new LocalDate(file.lastModified());
         System.out.println("Ceny akcji z aktualne na dzień: " + lastModified);
 
-return file;
+        return file;
 
 
     }
-
 
 
     private static String zwrocMiDzienTygZLonga(Long dataModyfikacjiPliku1L) {
@@ -1312,17 +1381,13 @@ return file;
     private static Map<String, ArrayList<Stock>> wczytajHistorieTranzakcjiZPlikuCSVDoTablicy(File savedTransactionsFile) throws ParseException {
         Map<String, ArrayList<Stock>> tablicaHistoriaTranzakcjiTemp = new HashMap<>();
         Map<String, ArrayList<Transaction>> aNewHistoryTransactionTable = new HashMap<>();
-        Scanner inputStream;
-        ArrayList<Stock> tablicaTranzakcji = new ArrayList<Stock>();
         ArrayList<Transaction> aNewTransactionTable = new ArrayList<>();
 
-        double aktualnaCena;
         String stockName;
-        int volume = 0;
-        double prize = 0;
-        String kindOfTransaction = null;
-        //String[] transactionDate = null;
-        String[] nextLine = null;
+        int volume;
+        double prize;
+        String kindOfTransaction;
+        String[] nextLine;
         ArrayList<String[]> transactionTable = new ArrayList<String[]>();
         char MY_SEPARATOR = ';';
         int SKIP_LINES_NUMBER = 30;         // [0-29] smienic
@@ -1432,28 +1497,6 @@ return file;
     }
 
 
-    private  ArrayList<Transaction> addTransactionsFromCSVFile(File savedTransactionsFile) {
-
-        char MY_SEPARATOR = ';';
-        int SKIP_LINES_NUMBER = 23;         // [0-29] smienic
-        ArrayList<Transaction> transactionTable = new ArrayList<>();
-        String[] lineFromFile;
-
-        CSVParser parser = new CSVParserBuilder().withSeparator(MY_SEPARATOR).build();
-       // CSVReader reader = new CSVReaderBuilder(new StringReader(savedTransactionsFile));
-        try (CSVReader reader = new CSVReader(new FileReader(savedTransactionsFile), MY_SEPARATOR,
-                CSVParser.DEFAULT_QUOTE_CHARACTER, SKIP_LINES_NUMBER)) {
-            while ((lineFromFile = reader.readNext()) != null) {
-                transactionTable.add(new Transaction(lineFromFile)); // transaction with corrected name
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return transactionTable;
-    }
-
 
     private static String correctStockNameIfHasChanged(String stockName) {
 //dupilcate of this method is in the Transaction class
@@ -1497,49 +1540,5 @@ return file;
         return stockName;
     }
 
-    private static Map<String, Double> addPresentStockPrizeFromTxtFiles(File NCfile, File MSfile) {
-        Map<String, Double> tablicaCen = new HashMap<String, Double>();
-
-        Scanner inputStreamNC = null, inputStreamMS = null;
-
-        double aktualnaCena;
-        String nazwaAkcji;
-
-        try {
-            inputStreamMS = new Scanner(MSfile);
-
-            while (inputStreamMS.hasNext()) {
-                String data = inputStreamMS.next();
-                String[] values = data.split(",");
-                nazwaAkcji = values[0];
-                aktualnaCena = Double.parseDouble(values[5]);
-                tablicaCen.put(nazwaAkcji, aktualnaCena);
-
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            inputStreamMS.close();
-        }
-
-        try {
-            inputStreamNC = new Scanner(NCfile);
-
-            while (inputStreamNC.hasNext()) {
-                String data = inputStreamNC.next();
-                String[] values = data.split(",");
-                nazwaAkcji = values[0];
-                aktualnaCena = Double.parseDouble(values[5]);
-                tablicaCen.put(nazwaAkcji, aktualnaCena);
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        // to ma byc?? ??TODO o co chodzi!?
-        finally {
-            inputStreamNC.close();
-        }
-        return tablicaCen;
-    }
 
 }
