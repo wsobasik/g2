@@ -7,11 +7,12 @@ public class StartApplication {
 
     public static void main(String[] args) throws IOException, URISyntaxException, ParseException {
 
+// TODO wczytywanie z mBanku pliku tranzakcji i dopisywanie do istniejacych
 
-    Program program = new Program();
+        Program program = new Program();
+        program.init();
 
-    program.init();//fds
-        System.out.println();
+
 
     }
 

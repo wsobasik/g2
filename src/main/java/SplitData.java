@@ -1,4 +1,4 @@
-import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 
 public class SplitData {
 
@@ -6,13 +6,14 @@ public class SplitData {
 
         private String stockName;
         private double ratio;
-        private LocalDate date;
+        private org.joda.time.LocalDateTime dateTime;
 
-    public SplitData(String stockName, double ratio, LocalDate date) {
+    public SplitData(String stockName, double ratio, LocalDateTime date) {
         this.stockName = stockName;
         this.ratio = ratio;
-        this.date = date;
+        this.dateTime = date;
     }
+
 
     public String getStockName() {
         return stockName;
@@ -30,11 +31,11 @@ public class SplitData {
         this.ratio = ratio;
     }
 
-    public LocalDate getDate() {
-        return date;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 }

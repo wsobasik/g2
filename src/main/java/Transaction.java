@@ -1,36 +1,40 @@
-import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
+
+import java.util.ArrayList;
+import java.util.Objects;
 
 
 public class Transaction {
 
     private String stockName;
-    private LocalDate transactionDate;
+    //   private LocalDate transactionDate;
+    private LocalDateTime transactionDateTime;
     private TRANSACTION_TYPE transactionType;
     private int volumeOfTransaction;
-    private Integer volumeBeforeTransaction;
-    private Integer volumeAfterTransaction;
     private double priceOfStockInTransaction;
     private double valueOfTransactionInCash;
+    private Integer volumeBeforeTransaction;
+    private Integer volumeAfterTransaction;
 
 
     public Transaction(String[] line) {
-        this.transactionDate =  LocalDateTime.parse(line[0], DateTimeFormat.forPattern("DD.MM.YYY HH:mm:ss")).toLocalDate();
-        this.stockName = correctStockNameIfHasChanged(line[1]);
-        this.transactionType = (line[2].equals("K") ? TRANSACTION_TYPE.K : TRANSACTION_TYPE.S);
-        this.volumeOfTransaction = Integer.parseInt(line[3].replace(" ", ""));
-        this.priceOfStockInTransaction = Double.parseDouble(line[4].replace(" ", "").replace(",", "."));
-        this.valueOfTransactionInCash = volumeOfTransaction * priceOfStockInTransaction;
+        stockName = line[1];
+        transactionDateTime = LocalDateTime.parse(line[0], DateTimeFormat.forPattern("dd.MM.yyyy HH:mm:ss"));
+        transactionType = (line[2].equals("K") ? TRANSACTION_TYPE.K : TRANSACTION_TYPE.S);
+        volumeOfTransaction = Integer.parseInt(line[3].replace(" ", ""));
+        priceOfStockInTransaction = Double.parseDouble(line[4].replace(" ", "").replace(",", "."));
+        valueOfTransactionInCash = volumeOfTransaction * priceOfStockInTransaction;
+        volumeBeforeTransaction = 0;
+        volumeAfterTransaction = 0;
     }
 
-
-    public LocalDate getTransactionDate() {
-        return transactionDate;
+    public LocalDateTime getTransactionDateTime() {
+        return transactionDateTime;
     }
 
-    public void setTransactionDate(LocalDate transactionDate) {
-        this.transactionDate = transactionDate;
+    public void setStockName(String stockName) {
+        this.stockName = stockName;
     }
 
     public double getValueOfTransactionInCash() {
@@ -45,17 +49,10 @@ public class Transaction {
         return transactionType;
     }
 
-    public void setTransactionType(TRANSACTION_TYPE transactionType) {
-        this.transactionType = transactionType;
-    }
-
     public int getVolumeOfTransaction() {
         return volumeOfTransaction;
     }
 
-    public void setVolumeOfTransaction(int volumeOfTransaction) {
-        this.volumeOfTransaction = volumeOfTransaction;
-    }
 
     public Integer getVolumeBeforeTransaction() {
         return volumeBeforeTransaction;
@@ -85,52 +82,30 @@ public class Transaction {
         return stockName;
     }
 
-    public void setStockName(String stockName) {
-        this.stockName = stockName;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return Double.compare(that.priceOfStockInTransaction, priceOfStockInTransaction) == 0 &&
+                Objects.equals(stockName, that.stockName) &&
+                Objects.equals(transactionDateTime, that.transactionDateTime) && //czy to porownuje z czasem czy tylko date?
+                transactionType == that.transactionType;
     }
 
-    private String correctStockNameIfHasChanged(String stockName) {
+    @Override
+    public int hashCode() {
 
-        if (stockName.equals("VELTO-NC")) {
-            return "VELTO";
-        }
-
-        if (stockName.equals("JUJUBEE-PDA")) {
-            return "JUJUBEE";
-        }
-        if (stockName.equals("SITE-NC") || (stockName.equals("SITE") )) {
-            return "FDGAMES";
-        }
-
-        if (stockName.equals("01CYBATON-NC")) {
-            return "01CYBATON";
-        }
-        if (stockName.equals("EKIOSK-NC")) {
-            return "EKIOSK";
-        }
-        if (stockName.equals("PGSSOFT-NC")) {
-            return "PGSSOFT";
-        }
-        if (stockName.equals("HARPER1")) {
-            return "HARPER";
-        }
-        if (stockName.equals("PLANETINN-NC")) {
-            return "PLANETINN";
-        }
-        if (stockName.equals("MGAMES-NC")) {
-            return "MGAMES";
-        }
-        if (stockName.equals("VIVID-NC")) {
-            return "VIVID";
-        }
-        if (stockName.equals("FARM51-NC")) {
-            return "FARM51";
-        }
-        if (stockName.equals("BIOMAX-NC")) {
-            return "BIOMAX";
-        }
-        return stockName;
+        return Objects.hash(stockName, transactionDateTime, transactionType, priceOfStockInTransaction);
     }
 
+    public static void correctTheNameOfStock(ArrayList<Transaction> transactions) {
 
+        for (Transaction transaction :
+                transactions) {
+            transaction.setStockName(Stock.correctStockNameIfHasChanged(transaction.getStockName()));
+        }
+
+
+    }
 }
