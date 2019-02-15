@@ -13,8 +13,8 @@ public class Program {
     private final String PARKIET_GLOWNY_CURRENT_PRICE_FILE = "\\ndohlcv.txt";
     private final String F2_CURRENT_PRICE_FILE = "\\f2.txt";
     private final String TRANSACTIONS_FILE = "\\PROD._MAKL_.csv";
-//    private final String TRANSACTIONS_FILE = "\\tranzakcja.csv";
-    
+    private final String TRANSACTIONS_FILE_NEW = "\\tranzakcja.csv";
+
     private final URL NC_URL = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
     private final URL PARKIET_GLOWNY_URL = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
     private final URL F2_GLOWNY_URL = new URL("http://bossa.pl/pub/jednolity/f2/omega/f2/ndohlcv.txt"); //parkiet glowny
