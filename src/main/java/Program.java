@@ -12,12 +12,14 @@ public class Program {
     private final String NEW_CONNECT_CURRENT_PRICE_FILE = "\\NCndohlcv.txt";
     private final String PARKIET_GLOWNY_CURRENT_PRICE_FILE = "\\ndohlcv.txt";
     private final String F2_CURRENT_PRICE_FILE = "\\f2.txt";
-    private final String TRANSACTIONS_FILE = "\\PROD._MAKL_.csv";
+    private final String TRANSACTIONS_FILE = "\\HistoryczneDaneWszystkichTranzakcji.Csv";
     private final String TRANSACTIONS_FILE_NEW = "\\tranzakcja.csv";
 
-    private final URL NC_URL = new URL("http://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
-    private final URL PARKIET_GLOWNY_URL = new URL("http://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
-    private final URL F2_GLOWNY_URL = new URL("http://bossa.pl/pub/jednolity/f2/omega/f2/ndohlcv.txt"); //parkiet glowny
+    private final URL NEW_CONNECT_ACTUAL_PRICES_URL = new URL("https://bossa.pl/pub/newconnect/omega/ncn/ndohlcv.txt");
+
+    private final URL PARKIET_GLOWNY_ACTUAL_PRICES_URL = new URL("https://bossa.pl/pub/ciagle/omega/cgl/ndohlcv.txt"); //parkiet glowny
+
+    private final URL F2_GLOWNY_URL = new URL("https://bossa.pl/pub/jednolity/f2/omega/f2/ndohlcv.txt"); //parkiet glowny
 
 //TODO dodac zapis danych historycznych wynikow z data plus moze automatyczne uruchamianie kazdego dnia?!
 
@@ -35,8 +37,8 @@ public class Program {
           File fileOfF2ActualPrices = new File(FILE_PATH_TO_RESOURCE + F2_CURRENT_PRICE_FILE);
 
 
-        fileOfNewConnectActualPrices = fileReaderN.downloadNewFile(NC_URL, fileOfNewConnectActualPrices);
-        fileOfMainStockActualPrices = fileReaderN.downloadNewFile(PARKIET_GLOWNY_URL, fileOfMainStockActualPrices);
+        fileOfNewConnectActualPrices = fileReaderN.downloadNewFile(NEW_CONNECT_ACTUAL_PRICES_URL, fileOfNewConnectActualPrices);
+        fileOfMainStockActualPrices = fileReaderN.downloadNewFile(PARKIET_GLOWNY_ACTUAL_PRICES_URL, fileOfMainStockActualPrices);
         fileOfF2ActualPrices = fileReaderN.downloadNewFile(F2_GLOWNY_URL, fileOfF2ActualPrices);
         File fileOfTransactions = new File(FILE_PATH_TO_RESOURCE + TRANSACTIONS_FILE);
 

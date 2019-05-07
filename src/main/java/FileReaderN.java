@@ -21,7 +21,7 @@ public class FileReaderN {
     public ArrayList<Transaction> addTransactionsFromCSVFile(File savedTransactionsFile) {
 
         final char MY_SEPARATOR = ';';
-        final int SKIP_LINES_NUMBER = 23;         // [0-29] smienic
+        final int SKIP_LINES_NUMBER = 35;         // [0-35] smieci z pliku csv
         ArrayList<Transaction> transactionTable = new ArrayList<>();
         String[] lineFromFile;
         CSVParser parser = new CSVParserBuilder().withSeparator(MY_SEPARATOR).build();
@@ -58,6 +58,7 @@ public class FileReaderN {
                 line = fileWithActualPrices.next();
                 lineValues = line.split(SEPARATOR);
                 stockName = lineValues[0];
+                System.out.println(stockName);
                 actualPrize = Double.parseDouble(lineValues[5]);
                 stockName = Stock.correctStockNameIfHasChanged(stockName);
                 actualPrices.add(new Stock(stockName,actualPrize));

@@ -21,9 +21,9 @@ public class Transaction {
     public Transaction(String[] line) {
         stockName = line[1];
         transactionDateTime = LocalDateTime.parse(line[0], DateTimeFormat.forPattern("dd.MM.yyyy HH:mm:ss"));
-        transactionType = (line[2].equals("K") ? TRANSACTION_TYPE.K : TRANSACTION_TYPE.S);
-        volumeOfTransaction = Integer.parseInt(line[3].replace(" ", ""));
-        priceOfStockInTransaction = Double.parseDouble(line[4].replace(" ", "").replace(",", "."));
+        transactionType = (line[3].equals("K") ? TRANSACTION_TYPE.K : TRANSACTION_TYPE.S);
+        volumeOfTransaction = Integer.parseInt(line[4].replace(" ", ""));
+        priceOfStockInTransaction = Double.parseDouble(line[5].replace(" ", "").replace(",", "."));
         valueOfTransactionInCash = volumeOfTransaction * priceOfStockInTransaction;
         volumeBeforeTransaction = 0;
         volumeAfterTransaction = 0;
