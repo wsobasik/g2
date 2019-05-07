@@ -4,6 +4,7 @@
 .Csv
 /.idea
 /src/main/bin/*
+src/resources/
 src/resources/NCndohlcv.txt
 src/resources/ndohlcv.txt
 src/resources/PROD._MAKL_.csv
