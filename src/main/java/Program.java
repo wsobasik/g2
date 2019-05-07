@@ -21,7 +21,7 @@ public class Program {
 
     private final URL F2_GLOWNY_URL = new URL("https://bossa.pl/pub/jednolity/f2/omega/f2/ndohlcv.txt"); //parkiet glowny
 
-//TODO dodac zapis danych historycznych wynikow z data plus moze automatyczne uruchamianie kazdego dnia?!
+//TODO dodac zapis danych historycznych wynikow z data.txt plus moze automatyczne uruchamianie kazdego dnia?!
 
 
     public Program() throws MalformedURLException {
