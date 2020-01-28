@@ -58,7 +58,10 @@ public class FileReaderN {
                 line = fileWithActualPrices.next();
                 lineValues = line.split(SEPARATOR);
                 stockName = lineValues[0];
-                System.out.println(stockName);
+                if (stockName.equals("EFENERGII")){
+                    System.out.println(stockName);
+
+                }
                 actualPrize = Double.parseDouble(lineValues[5]);
                 stockName = Stock.correctStockNameIfHasChanged(stockName);
                 actualPrices.add(new Stock(stockName,actualPrize));

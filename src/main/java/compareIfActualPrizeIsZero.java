@@ -1,4 +1,7 @@
+
 import java.util.Comparator;
+
+
 
 public class compareIfActualPrizeIsZero implements Comparator<Stock> {
 
