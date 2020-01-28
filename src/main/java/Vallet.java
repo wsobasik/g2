@@ -74,6 +74,15 @@ public class Vallet {
             }});
         }
 
+        stockName = "EFENERGII-NC";
+
+        index = isStockInVallet(stockName); // returns StockIndex
+        if (index > 0) {
+            valletsStock.get(index).setSplitData(new ArrayList<SplitData>() {{
+                add(new SplitData("EFENERGII-NC", 10, new LocalDateTime(2019, 1, 11, 0, 1)));
+            }});
+        }
+
         stockName = "HERKULES";
 
         index = isStockInVallet(stockName); // returns StockIndex
