@@ -386,6 +386,10 @@ public class Stock {
         if (stockName.equals("THEDUST-NC")) {
             return "THEDUST";
         }
+      /*  if (stockName.equals("EFENERGII-NC")) {
+            return "EFENERGII";
+        }*/
+
         return stockName;
     }
 

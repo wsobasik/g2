@@ -1,3 +1,5 @@
+
+
 import java.util.Comparator;
 
 public class compareByHandsLoss implements Comparator<Stock> {
