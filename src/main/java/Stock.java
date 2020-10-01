@@ -15,8 +15,8 @@ public class Stock {
     private Double profit = 0.0;
     private Integer actualVolumeAtHand = 0;
     private Double actualPrize = 0.0;
-    private Double actualValueAtHand = 0.0;//duble
-    private Double profitPlusValueOnAHand = 0.0;//duble zostawic jedno TODO
+    private Double actualValueAtHand = 0.0;//double
+    private Double profitPlusValueOnAHand = 0.0;//double zostawic jedno TODO
     private Double handsProfit=0.0;
     private ArrayList<Transaction> transactionsList;// is it really needed here??
     private ArrayList<SplitData> splitData;
@@ -283,12 +283,12 @@ public class Stock {
     public String toString() {
         String output;
         if (getActualVolumeAtHand() == 0) { //wyswietlanie dla zera volume
-            output = String.format("%-14s% -13.2f", stockName, this.getProfit());
+            output = String.format("%-18s % -13.2f", stockName, this.getProfit());
 
         } else
 
             {
-            output = String.format("%-14s % -13.2f %-13.2f % 14.2f %9s %12.2f %12.2f % 12.2f",
+            output = String.format("%-18s % -13.2f %-13.2f % 14.2f %9s %12.2f %12.2f % 12.2f",
                     stockName,
                     getProfit(),
                     getProfitPlusValueOnAHand(),
@@ -303,14 +303,14 @@ public class Stock {
     }
 
     public static void printHeader() {
-        String output = String.format("%-14s %-13s %-13s %14s %9s %12s %12s %12s ",
+        String output = String.format("%-18s %-13s %-13s %14s %9s %12s %12s %12s ",
                 "name",
                 "profit",
                 "profit w.Hand",
                 "Hand's profit",
                 "volumen",
-                "avg_prize",
-                "Act prize",
+                "usr. cena kupna",
+                "kurs",
                 "On a hand $"
 
         );
