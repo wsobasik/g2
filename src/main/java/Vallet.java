@@ -20,11 +20,10 @@ public class Vallet {
             stock.updateValueBeforeAfterRespectingSplit();
             stock.updateVolumeAtHand();
             stock.updateCashValueOfTransactions();
-            stock.updateValueAtHand();
             stock.countBuysValue();
             stock.countSellsValue();
             stock.setProfit(stock.getBuys() - stock.getSells());
-            stock.countAHandValueIfSoldToday();
+            stock.volumeAtHantTimesActualPrice();
             stock.countProfitInCashPlusValueAtHand();
             stock.setAvaragePrizePerStockOnAHand(stock.countAvaragePrizeOnStockOnAHand());
             stock.setHandsProfit();
@@ -130,8 +129,8 @@ public class Vallet {
             public int compare(Stock o1, Stock o2) {
                 int profitCmp = o1.getProfitPlusValueOnAHand().compareTo(o2.getProfitPlusValueOnAHand());
 
-                if ((o2.getActualPrize() == 0) && (o2.getActualVolumeAtHand() != 0)) return -1;
-                if ((o1.getActualPrize() == 0) && (o1.getActualVolumeAtHand() != 0)) return 1;
+                if ((o2.getActualPrize() == 0) && (o2.getVolumeAtHand() != 0)) return -1;
+                if ((o1.getActualPrize() == 0) && (o1.getVolumeAtHand() != 0)) return 1;
                 return profitCmp * (-1);
 
             }
@@ -167,8 +166,8 @@ public class Vallet {
                     return 1;
                 }
 
-                if ((o2.getActualPrize() == 0) && (o2.getActualVolumeAtHand() != 0)) return -1;
-                if ((o1.getActualPrize() == 0) && (o1.getActualVolumeAtHand() != 0)) return 1;
+                if ((o2.getActualPrize() == 0) && (o2.getVolumeAtHand() != 0)) return -1;
+                if ((o1.getActualPrize() == 0) && (o1.getVolumeAtHand() != 0)) return 1;
                 return profitCmp * (-1);
 
             }
