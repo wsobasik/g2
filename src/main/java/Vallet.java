@@ -20,9 +20,9 @@ public class Vallet {
             stock.updateValueBeforeAfterRespectingSplit();
             stock.updateVolumeAtHand();
             stock.updateCashValueOfTransactions();
-            stock.countBuysValue();
-            stock.countSellsValue();
-            stock.setProfit(stock.getBuys() - stock.getSells());
+            stock.setTotalValueOfTransactionsTypeBuy();
+            stock.setTotalValueOfTransactionsTypeSell();
+            stock.setProfit(stock.getTotalValueOfTransactionsTypeBuy() - stock.getTotalValueOfTransactionsTypeSell());
             stock.volumeAtHantTimesActualPrice();
             stock.countProfitInCashPlusValueAtHand();
             stock.setAvaragePrizePerStockOnAHand(stock.countAvaragePrizeOnStockOnAHand());

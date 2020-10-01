@@ -8,8 +8,8 @@ public class Stock {
 
 
     private String stockName;
-    private Double buys = 0.0;
-    private Double sells = 0.0;
+    private Double totalValueOfTransactionsTypeBuy = 0.0;
+    private Double totalValueOfTransactionsTypeSell = 0.0;
     private Double profit = 0.0;
     private Integer actualVolumeAtHand = 0;
     private Double actualPrize = 0.0;
@@ -43,20 +43,9 @@ public class Stock {
         this.actualPrize = actualPrize;
     }
 
-
-    public void setBuys(Double buys) {
-        this.buys = buys;
-    }
-
-    public void setSells(Double sells) {
-        this.sells = sells;
-    }
-
     public Double getHandsProfit() {
 
         return handsProfit;
-
-
 
     }
 
@@ -64,12 +53,8 @@ public class Stock {
         this.handsProfit = getVolumeAtHand()*(getAvaragePrizePerStockOnAHand()-getActualPrize());
     }
 
-
-
-
     public void updateValueBeforeAfterRespectingSplit() {
         //manages the split with ration 100 => 10 stock with ratio 0.1
-        ArrayList<Transaction> transactionsList = this.getTransactionsList();
         for (int i = 0; i < transactionsList.size() - 1; i++) {
             Transaction transaction = transactionsList.get(i);
             Transaction nextTransaction = transactionsList.get(i + 1);
@@ -127,36 +112,30 @@ public class Stock {
 
     public void updateCashValueOfTransactions() {
         //updates value of transaction
-        ArrayList<Transaction> transactionsList = this.getTransactionsList();
-        for (int i = 0; i < transactionsList.size(); i++) {
-            Transaction transaction = transactionsList.get(i);
+        for (Transaction transaction : transactionsList) {
             transaction.setValueOfTransactionInCash(transaction.getVolumeOfTransaction() * transaction.getPriceOfStockInTransaction());
         }
     }
 
-    public void countBuysValue() {
-        ArrayList<Transaction> transactionsList = this.getTransactionsList();
-        Double tempBuys = 0.0;
-        for (int i = 0; i < transactionsList.size(); i++) {
-            Transaction transaction = transactionsList.get(i);
+    public void setTotalValueOfTransactionsTypeBuy() {
+        Double totalBuyValue = 0.0;
+        for (Transaction transaction : transactionsList) {
             if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
-                tempBuys += transaction.getValueOfTransactionInCash();
+                totalBuyValue += transaction.getValueOfTransactionInCash();
             }
         }
-        setBuys(tempBuys);
+        this.totalValueOfTransactionsTypeBuy = totalBuyValue;
     }
 
 
-    public void countSellsValue() {
-        //ArrayList<Transaction> transactionsList = this.getTransactionsList();
-        Double tmpSells = 0.0;
-        for (int i = 0; i < transactionsList.size(); i++) {
-            Transaction transaction = transactionsList.get(i);
+    public void setTotalValueOfTransactionsTypeSell() {
+        Double totalSellValue = 0.0;
+        for (Transaction transaction : transactionsList) {
             if (transaction.getTransactionType().equals(TRANSACTION_TYPE.S)) {
-                tmpSells += transaction.getValueOfTransactionInCash();
+                totalSellValue += transaction.getValueOfTransactionInCash();
             }
         }
-        setSells(tmpSells);
+        this.totalValueOfTransactionsTypeSell = totalSellValue;
     }
 
     public void volumeAtHantTimesActualPrice() {
@@ -168,13 +147,13 @@ public class Stock {
         return stockName;
     }
 
-    public Double getBuys() {
-        return buys;
+    public Double getTotalValueOfTransactionsTypeBuy() {
+        return totalValueOfTransactionsTypeBuy;
     }
 
 
-    public Double getSells() {
-        return sells;
+    public Double getTotalValueOfTransactionsTypeSell() {
+        return totalValueOfTransactionsTypeSell;
     }
 
 
@@ -220,12 +199,12 @@ public class Stock {
     }
 
     public void setProfit(double v) {
-        this.profit = round(sells - buys, 2);
+        this.profit = round(totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2);
     }
 
     public void countProfitInCashPlusValueAtHand() {
-        setProfitPlusValueOnAHand(round(actualValueAtHand + sells - buys, 2));
-//        this.profitPlusValueOnAHand = round(actualValueAtHand + sells - buys, 2);
+        setProfitPlusValueOnAHand(round(actualValueAtHand + totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2));
+//        this.profitPlusValueOnAHand = round(actualValueAtHand + totalValueOfTransactionsTypeSell - setTotalValueOfTransactionsTypeBuy, 2);
     }//TODO zaokraglanie
 
     private ArrayList<SplitData> getSplitData() {
