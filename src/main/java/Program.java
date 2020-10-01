@@ -47,6 +47,7 @@ public class Program {
 
         ArrayList<Transaction> transactions = fileReaderN.addTransactionsFromCSVFile(fileOfTransactions);
         Transaction.correctTheNameOfStock(transactions);
+
         ArrayList<Stock> actualPricesMainStock = fileReaderN.createListOfStockWithActualPrizes(fileOfMainStockActualPrices);
         ArrayList<Stock> actualPricesNewConnect = fileReaderN.createListOfStockWithActualPrizes(fileOfNewConnectActualPrices);
         ArrayList<Stock> actualPricesF2 = fileReaderN.createListOfStockWithActualPrizes(fileOfF2ActualPrices);
@@ -57,7 +58,9 @@ public class Program {
         vallet.addActualPrices(actualPricesNewConnect);
         vallet.addActualPrices(actualPricesF2);
         vallet.sortTransactionsByTime();//LISTA sprawdzic czy dziala sortowanie
-        vallet.addSSplitData(); //LISTA
+
+        vallet.addSplit(); //LISTA  //TODO
+
         vallet.countValletStock(); //LISTA this is it!!
 //        vallet.sortValletsStockByLossAndIfActualPrizeIsZero();
         //vallet.sortByHandsProfit();
