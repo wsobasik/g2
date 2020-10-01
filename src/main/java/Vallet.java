@@ -22,9 +22,9 @@ public class Vallet {
             stock.updateCashValueOfTransactions();
             stock.setTotalValueOfTransactionsTypeBuy();
             stock.setTotalValueOfTransactionsTypeSell();
-            stock.setProfit(stock.getTotalValueOfTransactionsTypeBuy() - stock.getTotalValueOfTransactionsTypeSell());
+            stock.setTotalSumOfTransactionsTypeBuyAndSell(stock.getTotalValueOfTransactionsTypeBuy() - stock.getTotalValueOfTransactionsTypeSell());
             stock.volumeAtHantTimesActualPrice();
-            stock.countProfitInCashPlusValueAtHand();
+            stock.profit();
             stock.setAvaragePrizePerStockOnAHand(stock.countAvaragePrizeOnStockOnAHand());
             stock.setHandsProfit();
         }
@@ -127,7 +127,7 @@ public class Vallet {
         Collections.sort(valletsStock, new Comparator<Stock>() {
             @Override
             public int compare(Stock o1, Stock o2) {
-                int profitCmp = o1.getProfitPlusValueOnAHand().compareTo(o2.getProfitPlusValueOnAHand());
+                int profitCmp = o1.getProfit().compareTo(o2.getProfit());
 
                 if ((o2.getActualPrize() == 0) && (o2.getVolumeAtHand() != 0)) return -1;
                 if ((o1.getActualPrize() == 0) && (o1.getVolumeAtHand() != 0)) return 1;
@@ -142,9 +142,9 @@ public class Vallet {
         Collections.sort(valletsStock, new Comparator<Stock>() {
             @Override
             public int compare(Stock o1, Stock o2) {
-                int profitCmp = o1.getProfitPlusValueOnAHand().compareTo(o2.getProfitPlusValueOnAHand());
+                int profitCmp = o1.getProfit().compareTo(o2.getProfit());
 
-                if ((o1.getProfitPlusValueOnAHand() < 0) || (o2.getProfitPlusValueOnAHand() < 0)) {
+                if ((o1.getProfit() < 0) || (o2.getProfit() < 0)) {
 
                     if ((o1.getActualPrize() == 0) && (o2.getActualPrize() != 0)) {
                         return -1;
@@ -154,15 +154,15 @@ public class Vallet {
                     }
 
 
-                    return o1.getProfitPlusValueOnAHand().compareTo(o2.getProfitPlusValueOnAHand());
+                    return o1.getProfit().compareTo(o2.getProfit());
 
                 }
 
-                if ((o1.getProfitPlusValueOnAHand() < 0) && (o2.getProfitPlusValueOnAHand() > 0)) {
+                if ((o1.getProfit() < 0) && (o2.getProfit() > 0)) {
                     return -1;
                 }
 
-                if ((o1.getProfitPlusValueOnAHand() > 0) && (o2.getProfitPlusValueOnAHand() < 0)) {
+                if ((o1.getProfit() > 0) && (o2.getProfit() < 0)) {
                     return 1;
                 }
 
@@ -224,9 +224,9 @@ public class Vallet {
                 Stock.printHeader();
             }
             Stock stock = valletsStock.get(i);
-            totalProfit += stock.getProfit();
-            totalValueOnAHand += stock.getActualValueAtHand();
-            totalProfitPlusValueOnAHand += stock.getProfitPlusValueOnAHand();
+            totalProfit += stock.getTotalSumOfTransactionsTypeBuyAndSell();
+            totalValueOnAHand += stock.getValueAtHand();
+            totalProfitPlusValueOnAHand += stock.getProfit();
             System.out.println(stock.toString());
         }
         System.out.println();

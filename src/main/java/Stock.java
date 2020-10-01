@@ -6,20 +6,19 @@ import java.util.ArrayList;
 
 public class Stock {
 
-
     private String stockName;
+    private Double actualPrize = 0.0;
+    private ArrayList<SplitData> splitData;
+
     private Double totalValueOfTransactionsTypeBuy = 0.0;
     private Double totalValueOfTransactionsTypeSell = 0.0;
-    private Double profit = 0.0;
-    private Integer actualVolumeAtHand = 0;
-    private Double actualPrize = 0.0;
-    private Double actualValueAtHand = 0.0;//double
-    private Double profitPlusValueOnAHand = 0.0;//double zostawic jedno TODO
-    private Double handsProfit=0.0;
+    private Double totalSumOfTransactionsTypeBuyAndSell = 0.0;
+    private Integer volumenAtHand = 0;
+    private Double valueAtHand = 0.0;//double
+    private Double profit = 0.0;//double zostawic jedno TODO
+    private Double handsProfit = 0.0;
     private ArrayList<Transaction> transactionsList;// is it really needed here??
-    private ArrayList<SplitData> splitData;
     private Double avaragePrizePerStockOnAHand = 0.0;
-
 
 
     public Double getAvaragePrizePerStockOnAHand() {
@@ -35,7 +34,6 @@ public class Stock {
         this.stockName = t.getStockName();
         this.transactionsList = new ArrayList<>();
         this.transactionsList.add(t);
-
     }
 
     public Stock(String stockName, Double actualPrize) {
@@ -44,13 +42,11 @@ public class Stock {
     }
 
     public Double getHandsProfit() {
-
         return handsProfit;
-
     }
 
     public void setHandsProfit() {
-        this.handsProfit = getVolumeAtHand()*(getAvaragePrizePerStockOnAHand()-getActualPrize());
+        this.handsProfit = getVolumeAtHand() * (getAvaragePrizePerStockOnAHand() - getActualPrize());
     }
 
     public void updateValueBeforeAfterRespectingSplit() {
@@ -89,9 +85,7 @@ public class Stock {
                 nextTransaction.setVolumeBeforeTransaction(transaction.getVolumeAfterTransaction());
             }
         }
-
     }
-
 
     public void updateValueBeforAfterTransactionAndOnAHand() {
         //counts number of stock on hand
@@ -106,8 +100,6 @@ public class Stock {
                 nextTransaction.setVolumeBeforeTransaction(transaction.getVolumeAfterTransaction());
             }
         }
-
-
     }
 
     public void updateCashValueOfTransactions() {
@@ -170,41 +162,37 @@ public class Stock {
         this.actualPrize = actualPrize;
     }
 
-    public void setProfitPlusValueOnAHand(Double profitPlusValueOnAHand) {
-        this.profitPlusValueOnAHand = profitPlusValueOnAHand;
-    }
-
     public Integer getVolumeAtHand() {
-        return actualVolumeAtHand;
+        return volumenAtHand;
     }
 
-    public void setActualVolumeAtHand(Integer actualVolumeAtHand) {
-        this.actualVolumeAtHand = actualVolumeAtHand;
+    public void setVolumenAtHand(Integer volumenAtHand) {
+        this.volumenAtHand = volumenAtHand;
     }
 
-    public Double getActualValueAtHand() {
-        return actualValueAtHand;
+    public Double getValueAtHand() {
+        return valueAtHand;
     }
 
     public void setStockAtHandValue(Double actualValueAtHand) {
-        this.actualValueAtHand = actualValueAtHand;
-    }
-
-    public Double getProfitPlusValueOnAHand() {
-        return profitPlusValueOnAHand;
+        this.valueAtHand = actualValueAtHand;
     }
 
     public Double getProfit() {
         return profit;
     }
 
-    public void setProfit(double v) {
-        this.profit = round(totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2);
+    public Double getTotalSumOfTransactionsTypeBuyAndSell() {
+        return totalSumOfTransactionsTypeBuyAndSell;
     }
 
-    public void countProfitInCashPlusValueAtHand() {
-        setProfitPlusValueOnAHand(round(actualValueAtHand + totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2));
-//        this.profitPlusValueOnAHand = round(actualValueAtHand + totalValueOfTransactionsTypeSell - setTotalValueOfTransactionsTypeBuy, 2);
+    public void setTotalSumOfTransactionsTypeBuyAndSell(double v) {
+        this.totalSumOfTransactionsTypeBuyAndSell = round(totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2);
+    }
+
+    public void profit() {
+        this.profit = round(valueAtHand + totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2);
+//        this.profit = round(valueAtHand + totalValueOfTransactionsTypeSell - setTotalValueOfTransactionsTypeBuy, 2);
     }//TODO zaokraglanie
 
     private ArrayList<SplitData> getSplitData() {
@@ -219,20 +207,20 @@ public class Stock {
     public String toString() {
         String output;
         if (getVolumeAtHand() == 0) { //wyswietlanie dla zera volume
-            output = String.format("%-18s % -13.2f", stockName, this.getProfit());
+            output = String.format("%-18s % -13.2f", stockName, this.getTotalSumOfTransactionsTypeBuyAndSell());
 
         } else
 
-            {
+        {
             output = String.format("%-18s % -13.2f %-13.2f % 14.2f %9s %12.2f %12.2f % 12.2f",
                     stockName,
-                    getProfit(),
-                    getProfitPlusValueOnAHand(),
-                    getActualValueAtHand()- getVolumeAtHand()*getAvaragePrizePerStockOnAHand(),
+                    getTotalSumOfTransactionsTypeBuyAndSell(),
+                    profit,
+                    getValueAtHand() - getVolumeAtHand() * getAvaragePrizePerStockOnAHand(),
                     getVolumeAtHand(),
                     getAvaragePrizePerStockOnAHand(),
                     getActualPrize(),
-                    getActualValueAtHand());
+                    getValueAtHand());
 
         }
         return output;
@@ -241,9 +229,9 @@ public class Stock {
     public static void printHeader() {
         String output = String.format("%-18s %-13s %-13s %14s %9s %12s %12s %12s ",
                 "name",
-                "profit",
-                "profit w.Hand",
-                "Hand's profit",
+                "totalSumOfTransactionsTypeBuyAndSell",
+                "totalSumOfTransactionsTypeBuyAndSell w.Hand",
+                "Hand's totalSumOfTransactionsTypeBuyAndSell",
                 "volumen",
                 "usr. cena kupna",
                 "kurs",
@@ -253,7 +241,6 @@ public class Stock {
         System.out.println();
         System.out.println(output);
         System.out.println();
-
     }
 
     private static double round(double value, int places) {
@@ -263,14 +250,9 @@ public class Stock {
         return bd.doubleValue();
     }
 
-
-
-
     public void addTransaction(Transaction t) {
         this.transactionsList.add(t);
     }
-
-
 
     public static String correctStockNameIfHasChanged(String stockName) {
         //wywolywane z konstruktora Transaction
@@ -329,7 +311,7 @@ public class Stock {
     public void updateVolumeAtHand() {
         int sizeOfTransactionList = this.getTransactionsList().size() - 1;
         Transaction lastTransaction = this.getTransactionsList().get(sizeOfTransactionList);
-        setActualVolumeAtHand(lastTransaction.getVolumeAfterTransaction());
+        setVolumenAtHand(lastTransaction.getVolumeAfterTransaction());
     }
 
     public Double countAvaragePrizeOnStockOnAHand() {
@@ -337,21 +319,19 @@ public class Stock {
         Integer volumenOnAHand = getVolumeAtHand();
         Double avgValueOfLastBuyTransactions = 0.0;
         Transaction transaction;
-        int i = transactionsList.size()-1;
+        int i = transactionsList.size() - 1;
 
-        if (getVolumeAtHand()==0){
+        if (getVolumeAtHand() == 0) {
             return 0.0;
         }
-        while (volumenOnAHand>0) {
+        while (volumenOnAHand > 0) {
             transaction = transactionsList.get(i);
             if (transaction.getTransactionType().equals(TRANSACTION_TYPE.K)) {
-                volumenOnAHand -=transaction.getVolumeOfTransaction();
-                if (volumenOnAHand>0) {
+                volumenOnAHand -= transaction.getVolumeOfTransaction();
+                if (volumenOnAHand > 0) {
                     avgValueOfLastBuyTransactions += transaction.getValueOfTransactionInCash();
-                }
-                else
-                {
-                    avgValueOfLastBuyTransactions+= (transaction.getVolumeOfTransaction()+volumenOnAHand)
+                } else {
+                    avgValueOfLastBuyTransactions += (transaction.getVolumeOfTransaction() + volumenOnAHand)
                             * transaction.getPriceOfStockInTransaction();
                 }
             }
