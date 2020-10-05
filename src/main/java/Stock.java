@@ -23,9 +23,6 @@ public class Stock {
     private Integer volumenAtHand = 0;
     private Double valueAtHand = 0.0;//double
     private Double profit = 0.0;//double zostawic jedno TODO
-    private Double handsProfit = 0.0;
-    private ArrayList<Transaction> transactionsList;// is it really needed here??
-    private Double avaragePrizePerStockOnAHand = 0.0;
 
 
     public Double getAvaragePrizePerStockOnAHand() {
@@ -237,11 +234,11 @@ public class Stock {
     public static void printHeader() {
         String output = String.format("%-18s %-13s %-13s %14s %9s %12s %12s %12s ",
                 "name",
-                "totalSumOfTransactionsTypeBuyAndSell",
-                "totalSumOfTransactionsTypeBuyAndSell w.Hand",
-                "Hand's totalSumOfTransactionsTypeBuyAndSell",
+                "sell-buy",
+                "w.Hand",
+                "Hand's profit",
                 "volumen",
-                "usr. cena kupna",
+                "sr. cena",
                 "kurs",
                 "On a hand $"
 
