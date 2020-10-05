@@ -31,7 +31,7 @@ public class Vallet {
     }
 
 
-    public void addSSplitData() {
+    public void addSplit() {
         //TODO wczytac z pliku
         //this is to be rebuild and replaced
         int index;
@@ -40,8 +40,8 @@ public class Vallet {
 
         index = isStockInVallet(stockName); // returns StockIndex
         if (index > 0) {
-            valletsStock.get(index).setSplitData((new ArrayList<SplitData>() {{
-                add(new SplitData("DREWEX", 10, new LocalDateTime(2015, 6, 29, 0, 1)));
+            valletsStock.get(index).setSplit((new ArrayList<Split>() {{
+                add(new Split("DREWEX", 10, new LocalDateTime(2015, 6, 29, 0, 1)));
             }}));
         }
 
@@ -49,8 +49,8 @@ public class Vallet {
 
         index = isStockInVallet(stockName); // returns StockIndex
         if (index > 0) {
-            valletsStock.get(index).setSplitData(new ArrayList<SplitData>() {{
-                add(new SplitData("CIGAMES", 0.1, new LocalDateTime(2017, 2, 23, 0, 1))); //odwrocic dzielnik
+            valletsStock.get(index).setSplit(new ArrayList<Split>() {{
+                add(new Split("CIGAMES", 0.1, new LocalDateTime(2017, 2, 23, 0, 1))); //odwrocic dzielnik
             }});
         }
 
@@ -58,8 +58,8 @@ public class Vallet {
 
         index = isStockInVallet(stockName); // returns StockIndex
         if (index > 0) {
-            valletsStock.get(index).setSplitData(new ArrayList<SplitData>() {{
-                add(new SplitData("RESBUD", 5, new LocalDateTime(2017, 1, 13, 0, 1)));
+            valletsStock.get(index).setSplit(new ArrayList<Split>() {{
+                add(new Split("RESBUD", 5, new LocalDateTime(2017, 1, 13, 0, 1)));
             }});
         }
 
@@ -68,8 +68,8 @@ public class Vallet {
 
         index = isStockInVallet(stockName); // returns StockIndex
         if (index > 0) {
-            valletsStock.get(index).setSplitData(new ArrayList<SplitData>() {{
-                add(new SplitData("01CYBATON", 0.05, new LocalDateTime(2015, 11, 25, 0, 1)));
+            valletsStock.get(index).setSplit(new ArrayList<Split>() {{
+                add(new Split("01CYBATON", 0.05, new LocalDateTime(2015, 11, 25, 0, 1)));
             }});
         }
 
@@ -77,8 +77,8 @@ public class Vallet {
 
         index = isStockInVallet(stockName); // returns StockIndex
         if (index > 0) {
-            valletsStock.get(index).setSplitData(new ArrayList<SplitData>() {{
-                add(new SplitData("EFENERGII-NC", 10, new LocalDateTime(2019, 1, 11, 0, 1)));
+            valletsStock.get(index).setSplit(new ArrayList<Split>() {{
+                add(new Split("EFENERGII-NC", 10, new LocalDateTime(2019, 1, 11, 0, 1)));
             }});
         }
 
@@ -86,8 +86,8 @@ public class Vallet {
 
         index = isStockInVallet(stockName); // returns StockIndex
         if (index > 0) {
-            valletsStock.get(index).setSplitData(new ArrayList<SplitData>() {{
-                add(new SplitData("HERKULES", 5, new LocalDateTime(2012, 9, 19, 0, 1)));
+            valletsStock.get(index).setSplit(new ArrayList<Split>() {{
+                add(new Split("HERKULES", 5, new LocalDateTime(2012, 9, 19, 0, 1)));
             }});
         }
     }

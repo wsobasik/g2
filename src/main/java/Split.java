@@ -1,6 +1,6 @@
 import org.joda.time.LocalDateTime;
 
-public class SplitData {
+public class Split {
 
 
 
@@ -8,7 +8,7 @@ public class SplitData {
         private double ratio;
         private org.joda.time.LocalDateTime dateTime;
 
-    public SplitData(String stockName, double ratio, LocalDateTime date) {
+    public Split(String stockName, double ratio, LocalDateTime date) {
         this.stockName = stockName;
         this.ratio = ratio;
         this.dateTime = date;
