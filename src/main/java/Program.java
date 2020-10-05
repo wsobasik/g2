@@ -70,7 +70,7 @@ public class Program {
         //vallet.sortValletsStockByLossAndIfActualPrizeIsZero();
 //        vallet.sortValletsStockByProfitIncludesHandANDStockActualPrize();
         //vallet.sortValletsStockByLossIncludesHandANDStockActualPrize();
-        //posortowac po getActualValueAtHand()-getActualVolumeAtHand()*getAvaragePrizePerStockOnAHand() i po zysku najpierw TODO
+        //posortowac po getValueAtHand()-getVolumeAtHand()*getAvaragePrizePerStockOnAHand() i po zysku najpierw TODO
         vallet.sortByLossWithoutHand();
         vallet.printItAllOut();
 
