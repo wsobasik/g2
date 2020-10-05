@@ -9,8 +9,8 @@ import java.util.*;
 public class Program {
 
     private final File FILE_PATH_TO_RESOURCE = new File("src/resources");
-    private final String NEW_CONNECT_CURRENT_PRICE_FILE = "\\NCndohlcv.txt";
-    private final String PARKIET_GLOWNY_CURRENT_PRICE_FILE = "\\ndohlcv.txt";
+    private final String NEW_CONNECT_CURRENT_PRICE_FILE = "\\NCN.txt";
+    private final String PARKIET_GLOWNY_CURRENT_PRICE_FILE = "\\CGL.txt";
     private final String F2_CURRENT_PRICE_FILE = "\\f2.txt";
     private final String TRANSACTIONS_FILE = "\\HistoryczneDaneWszystkichTranzakcji.Csv";
     private final String TRANSACTIONS_FILE_NEW = "\\tranzakcja.csv";
@@ -53,7 +53,7 @@ public class Program {
         ArrayList<Stock> actualPricesF2 = fileReaderN.createListOfStockWithActualPrizes(fileOfF2ActualPrices);
 
         Vallet vallet = new Vallet();
-        vallet.addTransactionsToTheValletsStocks(transactions);//LISTA
+        vallet.addTransactionsToTheValetsStocks(transactions);//LISTA
         vallet.addActualPrices(actualPricesMainStock);
         vallet.addActualPrices(actualPricesNewConnect);
         vallet.addActualPrices(actualPricesF2);
@@ -72,6 +72,7 @@ public class Program {
         //vallet.sortValletsStockByLossIncludesHandANDStockActualPrize();
         //posortowac po getValueAtHand()-getVolumeAtHand()*getAvaragePrizePerStockOnAHand() i po zysku najpierw TODO
         vallet.sortByLossWithoutHand();
+        vallet.sortByLossWitHand();
         vallet.printItAllOut();
 
 
