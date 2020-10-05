@@ -3,26 +3,26 @@ import org.joda.time.LocalDateTime;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class Stock {
 
     private String stockName;
     private Double actualPrize = 0.0;
-
-    private Double actualValueAtHand = 0.0;//duble
-    private Double profitPlusValueOnAHand = 0.0;//duble zostawic jedno TODO
-    private Double handsProfit=0.0;
-    private ArrayList<Transaction> transactionsList;// is it really needed here??
     private ArrayList<Split> splitData;
-    private Double handsValueInCashWhenBought=0.0;
-    private Double avaragePrizePerStockOnAHand = 0.0;
 
+    private ArrayList<Transaction> transactionsList;// is it really needed here??
     private Double totalValueOfTransactionsTypeBuy = 0.0;
     private Double totalValueOfTransactionsTypeSell = 0.0;
     private Double totalSumOfTransactionsTypeBuyAndSell = 0.0;
+
+    private Double avaragePrizePerStockOnAHand = 0.0;
+    private Double handsProfit = 0.0;
     private Integer volumenAtHand = 0;
     private Double valueAtHand = 0.0;//double
-    private Double profit = 0.0;//double zostawic jedno TODO
+
+    private Double profit = 0.0;
+    private Double priceToGetProfit;
 
 
     public Double getAvaragePrizePerStockOnAHand() {
@@ -61,8 +61,7 @@ public class Stock {
             ArrayList<Split> splitList = this.getSplitData();
 
             if (null != splitList) {//can this be null
-                for (int j = 0; j < splitList.size(); j++) {
-                    Split split = splitList.get(j);
+                for (Split split : splitList) {
                     LocalDateTime splitDataDate = split.getDateTime();
                     LocalDateTime transactionDateTime = transaction.getTransactionDateTime();
                     LocalDateTime nextTransactionDate = nextTransaction.getTransactionDateTime();
@@ -123,6 +122,10 @@ public class Stock {
         this.totalValueOfTransactionsTypeBuy = totalBuyValue;
     }
 
+    public void setPriceToGetProfit() {
+        priceToGetProfit = Math.abs(getTotalSumOfTransactionsTypeBuyAndSell() / getVolumeAtHand());
+    }
+
 
     public void setTotalValueOfTransactionsTypeSell() {
         Double totalSellValue = 0.0;
@@ -143,15 +146,6 @@ public class Stock {
         return stockName;
     }
 
-    public Double getTotalValueOfTransactionsTypeBuy() {
-        return totalValueOfTransactionsTypeBuy;
-    }
-
-
-    public Double getTotalValueOfTransactionsTypeSell() {
-        return totalValueOfTransactionsTypeSell;
-    }
-
 
     public ArrayList<Transaction> getTransactionsList() {
         return transactionsList;
@@ -170,7 +164,7 @@ public class Stock {
         return volumenAtHand;
     }
 
-    public void setVolumenAtHand(Integer volumenAtHand) {
+    private void setVolumenAtHand(Integer volumenAtHand) {
         this.volumenAtHand = volumenAtHand;
     }
 
@@ -178,7 +172,7 @@ public class Stock {
         return valueAtHand;
     }
 
-    public void setStockAtHandValue(Double actualValueAtHand) {
+    private void setStockAtHandValue(Double actualValueAtHand) {
         this.valueAtHand = actualValueAtHand;
     }
 
@@ -190,7 +184,7 @@ public class Stock {
         return totalSumOfTransactionsTypeBuyAndSell;
     }
 
-    public void setTotalSumOfTransactionsTypeBuyAndSell(double v) {
+    public void setTotalSumOfTransactionsTypeBuyAndSell() {
         this.totalSumOfTransactionsTypeBuyAndSell = round(totalValueOfTransactionsTypeSell - totalValueOfTransactionsTypeBuy, 2);
     }
 
@@ -200,7 +194,7 @@ public class Stock {
     }//TODO zaokraglanie
 
 
-    public ArrayList<Split> getSplitData() {
+    private ArrayList<Split> getSplitData() {
         return splitData;
     }
 
@@ -217,7 +211,7 @@ public class Stock {
         } else
 
         {
-            output = String.format("%-18s % -13.2f %-13.2f % 14.2f %9s %12.2f %12.2f % 12.2f",
+            output = String.format("%-18s % -13.2f %-13.2f % 14.2f %9s %12.2f %12.2f % 12.2f %12.2f",
                     stockName,
                     getTotalSumOfTransactionsTypeBuyAndSell(),
                     profit,
@@ -225,22 +219,24 @@ public class Stock {
                     getVolumeAtHand(),
                     getAvaragePrizePerStockOnAHand(),
                     getActualPrize(),
-                    getValueAtHand());
+                    getValueAtHand(),
+                    priceToGetProfit);
 
         }
         return output;
     }
 
     public static void printHeader() {
-        String output = String.format("%-18s %-13s %-13s %14s %9s %12s %12s %12s ",
+        String output = String.format("%-18s %-13s %-13s %14s %9s %12s %12s %12s %12s",
                 "name",
                 "sell-buy",
-                "w.Hand",
+                "profit ",
                 "Hand's profit",
                 "volumen",
                 "sr. cena",
                 "kurs",
-                "On a hand $"
+                "On a hand $",
+                "na swoje"
 
         );
         System.out.println();
@@ -273,7 +269,7 @@ public class Stock {
         if ((stockName.equals("JUJUBEE-PDA")) || (stockName.equals("JUJUBEE-NC"))) {
             return "JUJUBEE";
         }
-        if (stockName.equals("SITE-NC") || stockName.equals("SITE")|| (stockName.equals("FDGAMES"))) {
+        if (stockName.equals("SITE-NC") || stockName.equals("SITE") || (stockName.equals("FDGAMES"))) {
             return "NGGAMES";
         }
         if (stockName.equals("01CYBATON-NC")) {
@@ -344,5 +340,4 @@ public class Stock {
         }
         return avgValueOfLastBuyTransactions / getVolumeAtHand();
     }
-
 }

@@ -6,9 +6,9 @@ import java.util.*;
 
 public class Vallet {
 
-    public ArrayList<Stock> valletsStock = new ArrayList<>();
+    private ArrayList<Stock> valletsStock = new ArrayList<>();
 
-    public Vallet() {
+    Vallet() {
 
     }
 
@@ -22,11 +22,13 @@ public class Vallet {
             stock.updateCashValueOfTransactions();
             stock.setTotalValueOfTransactionsTypeBuy();
             stock.setTotalValueOfTransactionsTypeSell();
-            stock.setTotalSumOfTransactionsTypeBuyAndSell(stock.getTotalValueOfTransactionsTypeBuy() - stock.getTotalValueOfTransactionsTypeSell());
+            stock.setTotalSumOfTransactionsTypeBuyAndSell();
             stock.volumeAtHantTimesActualPrice();
             stock.profit();
             stock.setAvaragePrizePerStockOnAHand(stock.countAvaragePrizeOnStockOnAHand());
             stock.setHandsProfit();
+            stock.setPriceToGetProfit();
+
         }
     }
 
@@ -38,7 +40,7 @@ public class Vallet {
         String stockName;
         stockName = "DREWEX";
 
-        index = isStockInVallet(stockName); // returns StockIndex
+        index = isStockInValet(stockName); // returns StockIndex
         if (index > 0) {
             valletsStock.get(index).setSplit((new ArrayList<Split>() {{
                 add(new Split("DREWEX", 10, new LocalDateTime(2015, 6, 29, 0, 1)));
@@ -47,7 +49,7 @@ public class Vallet {
 
         stockName = "CIGAMES";
 
-        index = isStockInVallet(stockName); // returns StockIndex
+        index = isStockInValet(stockName); // returns StockIndex
         if (index > 0) {
             valletsStock.get(index).setSplit(new ArrayList<Split>() {{
                 add(new Split("CIGAMES", 0.1, new LocalDateTime(2017, 2, 23, 0, 1))); //odwrocic dzielnik
@@ -56,7 +58,7 @@ public class Vallet {
 
         stockName = "RESBUD";
 
-        index = isStockInVallet(stockName); // returns StockIndex
+        index = isStockInValet(stockName); // returns StockIndex
         if (index > 0) {
             valletsStock.get(index).setSplit(new ArrayList<Split>() {{
                 add(new Split("RESBUD", 5, new LocalDateTime(2017, 1, 13, 0, 1)));
@@ -66,7 +68,7 @@ public class Vallet {
 
         stockName = "01CYBATON";
 
-        index = isStockInVallet(stockName); // returns StockIndex
+        index = isStockInValet(stockName); // returns StockIndex
         if (index > 0) {
             valletsStock.get(index).setSplit(new ArrayList<Split>() {{
                 add(new Split("01CYBATON", 0.05, new LocalDateTime(2015, 11, 25, 0, 1)));
@@ -75,7 +77,7 @@ public class Vallet {
 
         stockName = "EFENERGII-NC";
 
-        index = isStockInVallet(stockName); // returns StockIndex
+        index = isStockInValet(stockName); // returns StockIndex
         if (index > 0) {
             valletsStock.get(index).setSplit(new ArrayList<Split>() {{
                 add(new Split("EFENERGII-NC", 10, new LocalDateTime(2019, 1, 11, 0, 1)));
@@ -84,7 +86,7 @@ public class Vallet {
 
         stockName = "HERKULES";
 
-        index = isStockInVallet(stockName); // returns StockIndex
+        index = isStockInValet(stockName); // returns StockIndex
         if (index > 0) {
             valletsStock.get(index).setSplit(new ArrayList<Split>() {{
                 add(new Split("HERKULES", 5, new LocalDateTime(2012, 9, 19, 0, 1)));
@@ -95,88 +97,19 @@ public class Vallet {
     public void sortTransactionsByTime() {
         for (Stock stock : valletsStock) {
             ArrayList<Transaction> transactionsList = stock.getTransactionsList();
-            Collections.sort(transactionsList, (t1, t2) -> t1.getTransactionDateTime().compareTo(t2.getTransactionDateTime()));
+            transactionsList.sort(Comparator.comparing(Transaction::getTransactionDateTime));
         }
     }
 
-    public void sortValletsStockIfActualPrizeIsZeroAndByLossAndByLossOnAHand() {
-        Collections.sort(valletsStock, new compareIfActualPrizeIsZero().thenComparing(new compareByLossWithoutHand()).thenComparing(new compareByLossOnAHand()));
-    }
-
-    public void sortValletsStockByLossAndIfActualPrizeIsZero() {
-        Collections.sort(valletsStock, new compareByLossWithoutHand().thenComparing(new compareIfActualPrizeIsZero()));
-    }
-
-    public void sortByHandsProfit() {
-        Collections.sort(valletsStock, new compareByHandsProfit());
-    }
-
-    public void sortByHandsLoss() {
-        Collections.sort(valletsStock, new compareByHandsLoss());
-    }
     public void sortByLossWithoutHand() {
-        Collections.sort(valletsStock, new compareByLossWithoutHand());
+        valletsStock.sort(new compareByLossWithoutHand());
     }
 
-    public void sortByHandsLossAndIfActualPrizeIsZero() {
-        Collections.sort(valletsStock, new compareByHandsLoss().thenComparing(new compareIfActualPrizeIsZero()));
+    public void sortByLossWitHand() {
+        valletsStock.sort((t1, t2) -> t2.getValueAtHand().compareTo(t1.getValueAtHand()));
     }
 
-
-    public void sortValletsStockByProfitIncludesHandANDStockActualPrize() {
-        Collections.sort(valletsStock, new Comparator<Stock>() {
-            @Override
-            public int compare(Stock o1, Stock o2) {
-                int profitCmp = o1.getProfit().compareTo(o2.getProfit());
-
-                if ((o2.getActualPrize() == 0) && (o2.getVolumeAtHand() != 0)) return -1;
-                if ((o1.getActualPrize() == 0) && (o1.getVolumeAtHand() != 0)) return 1;
-                return profitCmp * (-1);
-
-            }
-        });
-
-    }
-
-    public void sortValletsStockByLossIncludesHandANDStockActualPrize() {
-        Collections.sort(valletsStock, new Comparator<Stock>() {
-            @Override
-            public int compare(Stock o1, Stock o2) {
-                int profitCmp = o1.getProfit().compareTo(o2.getProfit());
-
-                if ((o1.getProfit() < 0) || (o2.getProfit() < 0)) {
-
-                    if ((o1.getActualPrize() == 0) && (o2.getActualPrize() != 0)) {
-                        return -1;
-                    }
-                    if ((o1.getActualPrize() != 0) && (o2.getActualPrize() == 0)) {
-                        return 1;
-                    }
-
-
-                    return o1.getProfit().compareTo(o2.getProfit());
-
-                }
-
-                if ((o1.getProfit() < 0) && (o2.getProfit() > 0)) {
-                    return -1;
-                }
-
-                if ((o1.getProfit() > 0) && (o2.getProfit() < 0)) {
-                    return 1;
-                }
-
-                if ((o2.getActualPrize() == 0) && (o2.getVolumeAtHand() != 0)) return -1;
-                if ((o1.getActualPrize() == 0) && (o1.getVolumeAtHand() != 0)) return 1;
-                return profitCmp * (-1);
-
-            }
-        });
-
-    }
-
-
-    private int isStockInVallet(String stockName) {
+    private int isStockInValet(String stockName) {
 
         for (int i = 0; i < valletsStock.size(); i++) {
             if (valletsStock.get(i).getStockName().equals(stockName)) {
@@ -188,11 +121,11 @@ public class Vallet {
     }
 
 
-    public void addTransactionsToTheValletsStocks(ArrayList<Transaction> listOfTransactions) {
+    public void addTransactionsToTheValetsStocks(ArrayList<Transaction> listOfTransactions) {
 
         for (Transaction t : listOfTransactions) {
             String stockName = t.getStockName();
-            int index = isStockInTheVallet(stockName);
+            int index = isStockInTheValet(stockName);
             if (index != -1) {
                 valletsStock.get(index).addTransaction(t);
             } else {
@@ -202,7 +135,7 @@ public class Vallet {
     }
 
 
-    private int isStockInTheVallet(String stockName) {
+    private int isStockInTheValet(String stockName) {
         for (int i = 0; i < valletsStock.size(); i++) {
             if (valletsStock.get(i).getStockName().equals(stockName)) {
                 return i;
@@ -250,7 +183,7 @@ public class Vallet {
             if (stock.getActualPrize() == 0) {
                 System.out.println(stock.getStockName() + "cena zero, sprawdzic nazwe cen aktualnych z nazwa w pliku tranzakcje");
             }
-            index = isStockInVallet(stock.getStockName()); // returns StockIndex
+            index = isStockInValet(stock.getStockName()); // returns StockIndex
             if (index != -1) {
                 valletsStock.get(index).setActualPrize(stock.getActualPrize());
             }

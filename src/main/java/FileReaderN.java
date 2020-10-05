@@ -75,6 +75,7 @@ public class FileReaderN {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            System.out.println("Pliku nie odnaleziono");
         }
 
         return actualPrices;
