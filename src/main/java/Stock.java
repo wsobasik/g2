@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 
-import static java.lang.Integer.compare;
-
 public class Stock {
 
 
@@ -19,7 +17,7 @@ public class Stock {
     private Double profitPlusValueOnAHand = 0.0;//duble zostawic jedno TODO
     private Double handsProfit=0.0;
     private ArrayList<Transaction> transactionsList;// is it really needed here??
-    private ArrayList<SplitData> splitData;
+    private ArrayList<Split> splitData;
     private Double handsValueInCashWhenBought=0.0;
     private Double avaragePrizePerStockOnAHand = 0.0;
 
@@ -103,16 +101,16 @@ public class Stock {
         for (int i = 0; i < transactionsList.size() - 1; i++) {
             Transaction transaction = transactionsList.get(i);
             Transaction nextTransaction = transactionsList.get(i + 1);
-            ArrayList<SplitData> splitDataList = this.getSplitData();
+            ArrayList<Split> splitList = this.getSplitData();
 
-            if (null != splitDataList) {//can this be null
-                for (int j = 0; j < splitDataList.size(); j++) {
-                    SplitData splitData = splitDataList.get(j);
-                    LocalDateTime splitDataDate = splitData.getDateTime();
+            if (null != splitList) {//can this be null
+                for (int j = 0; j < splitList.size(); j++) {
+                    Split split = splitList.get(j);
+                    LocalDateTime splitDataDate = split.getDateTime();
                     LocalDateTime transactionDateTime = transaction.getTransactionDateTime();
                     LocalDateTime nextTransactionDate = nextTransaction.getTransactionDateTime();
                     if (transactionDateTime.isBefore(splitDataDate) && (splitDataDate.isBefore(nextTransactionDate) || splitDataDate.isEqual(nextTransactionDate))) {
-                        nextTransaction.setVolumeBeforeTransaction((int) (nextTransaction.getVolumeBeforeTransaction() / splitData.getRatio()));
+                        nextTransaction.setVolumeBeforeTransaction((int) (nextTransaction.getVolumeBeforeTransaction() / split.getRatio()));
                         updateValueBeforAfterTransactionAndOnAHand(i + 1);
                         //countValueOfTransaction(i+1);
 
@@ -271,11 +269,11 @@ public class Stock {
 //        this.profitPlusValueOnAHand = round(actualValueAtHand + sells - buys, 2);
     }//TODO zaokraglanie
 
-    public ArrayList<SplitData> getSplitData() {
+    public ArrayList<Split> getSplitData() {
         return splitData;
     }
 
-    public void setSplitData(ArrayList<SplitData> splitData) {
+    public void setSplit(ArrayList<Split> splitData) {
         this.splitData = splitData;
     }
 
@@ -353,8 +351,8 @@ public class Stock {
         if ((stockName.equals("JUJUBEE-PDA")) || (stockName.equals("JUJUBEE-NC"))) {
             return "JUJUBEE";
         }
-        if (stockName.equals("SITE-NC") || (stockName.equals("SITE"))) {
-            return "FDGAMES";
+        if (stockName.equals("SITE-NC") || stockName.equals("SITE")|| (stockName.equals("FDGAMES"))) {
+            return "NGGAMES";
         }
         if (stockName.equals("01CYBATON-NC")) {
             return "01CYBATON";
